@@ -61,16 +61,16 @@ function previewTerm(code) {
         let startYear = endYear - 1;
         let acadYear = startYear + '-' + endYear;
         
-        let semester = '';
-        if(termSuffix === '1') semester = '1st Sem';
-        else if(termSuffix === '2') semester = '2nd Sem';
-        else if(termSuffix === '0') semester = 'Summer';
+        let semester_id = '';
+        if(termSuffix === '1') semester_id = '1st Sem';
+        else if(termSuffix === '2') semester_id = '2nd Sem';
+        else if(termSuffix === '0') semester_id = 3;
         else {
             preview.innerHTML = '<span class="text-danger">Invalid Term Suffix</span>';
             return;
         }
         
-        preview.innerHTML = `<i class="fas fa-check-circle"></i> SY ${acadYear}, ${semester}`;
+        preview.innerHTML = `<i class="fas fa-check-circle"></i> SY ${acadYear}, ${semester_id}`;
     } else {
         preview.innerHTML = '';
     }

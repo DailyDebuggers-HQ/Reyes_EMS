@@ -7,12 +7,12 @@ include_once __DIR__ . '/includes/header.php';
 $totalStudents = $pdo->query("SELECT COUNT(*) FROM students")->fetchColumn();
 
 // Find the active/latest term for accurate enrolled count
-$latestTermStmt = $pdo->query("SELECT academic_year, semester FROM enrollments ORDER BY academic_year DESC, semester DESC LIMIT 1");
+$latestTermStmt = $pdo->query("SELECT academic_year, semester_id FROM enrollments ORDER BY academic_year DESC, semester_id DESC LIMIT 1");
 $latestTerm = $latestTermStmt->fetch();
 $active_academic_year = $latestTerm ? $latestTerm['academic_year'] : '2025-2026';
-$active_semester = $latestTerm ? $latestTerm['semester'] : '1st';
+$active_semester = $latestTerm ? $latestTerm['semester_id'] : 1;
 
-$totalEnrolledStmt = $pdo->prepare("SELECT COUNT(*) FROM enrollments WHERE academic_year = ? AND semester = ? AND status != 'Cancelled'");
+$totalEnrolledStmt = $pdo->prepare("SELECT COUNT(*) FROM enrollments WHERE academic_year = ? AND semester_id = ? AND status != 'Cancelled'");
 $totalEnrolledStmt->execute([$active_academic_year, $active_semester]);
 $totalEnrolled = $totalEnrolledStmt->fetchColumn();
 

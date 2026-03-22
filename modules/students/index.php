@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $last_name = $_POST['last_name'] ?? '';
     $gender = $_POST['gender'] ?? 'Other';
     $program_id = null; // No longer collected here
-    $current_year_level = null; // Default to null (N/A)
+    $year_level_id = null; // Default to null (N/A)
 
     try {
         $pdo->beginTransaction();
@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         $student_id = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
 
-        $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, gender, program_id, current_year_level, status) VALUES (?, ?, ?, ?, ?, ?, 'Regular')");
-        $stmt->execute([$student_id, $first_name, $last_name, $gender, $program_id, $current_year_level]);
+        $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, gender, program_id, year_level_id, status) VALUES (?, ?, ?, ?, ?, ?, 'Regular')");
+        $stmt->execute([$student_id, $first_name, $last_name, $gender, $program_id, $year_level_id]);
         
         $pdo->commit();
         echo "<div class='alert alert-success alert-dismissible fade show'><i class='fas fa-check-circle'></i> Student {$student_id} added successfully! <button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
@@ -99,22 +99,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 $search = $_GET['search'] ?? '';
 $filter_program = $_GET['program_id'] ?? '';
-$filter_year = $_GET['year_level'] ?? '';
+$filter_year = $_GET['year_level_id'] ?? '';
 
 // Find the active/latest term to check current enrollment status
-$latestTermStmt = $pdo->query("SELECT academic_year, semester FROM enrollments ORDER BY academic_year DESC, semester DESC LIMIT 1");
+$latestTermStmt = $pdo->query("SELECT academic_year, semester_id FROM enrollments ORDER BY academic_year DESC, semester_id DESC LIMIT 1");
 $latestTerm = $latestTermStmt->fetch();
 $active_academic_year = $latestTerm ? $latestTerm['academic_year'] : '2025-2026';
-$active_semester = $latestTerm ? $latestTerm['semester'] : '1st';
+$active_semester = $latestTerm ? $latestTerm['semester_id'] : 1;
 
 // Fetch academic programs for the filter dropdown
 $programs = $pdo->query("SELECT * FROM programs ORDER BY program_code")->fetchAll();
 
 // Build query
 $sql = "SELECT s.*, p.program_code, p.program_name,
-        (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = s.student_id AND e.academic_year = '$active_academic_year' AND e.semester = '$active_semester' AND e.status != 'Cancelled') as is_currently_enrolled,
+        (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = s.student_id AND e.academic_year = '$active_academic_year' AND e.semester_id = '$active_semester' AND e.status != 'Cancelled') as is_currently_enrolled,
         (SELECT section FROM enrollments e WHERE e.student_id = s.student_id AND e.status != 'Cancelled' ORDER BY enrollment_date DESC LIMIT 1) as latest_section,
-        (SELECT semester FROM enrollments e WHERE e.student_id = s.student_id AND e.status != 'Cancelled' ORDER BY enrollment_date DESC LIMIT 1) as latest_semester,
+        (SELECT semester_id FROM enrollments e WHERE e.student_id = s.student_id AND e.status != 'Cancelled' ORDER BY enrollment_date DESC LIMIT 1) as latest_semester,
         (SELECT enrollment_id FROM enrollments e WHERE e.student_id = s.student_id AND e.status != 'Cancelled' ORDER BY enrollment_date DESC LIMIT 1) as latest_enrollment_id
         FROM students s
         LEFT JOIN programs p ON s.program_id = p.program_id
@@ -132,7 +132,7 @@ if ($filter_program) {
     $params[] = $filter_program;
 }
 if ($filter_year) {
-    $sql .= " AND s.current_year_level = ?";
+    $sql .= " AND s.year_level_id = ?";
     $params[] = $filter_year;
 }
 
@@ -168,7 +168,7 @@ $students = $stmt->fetchAll();
                 </select>
             </div>
             <div class="col-md-2 mb-2">
-                <select name="year_level" class="form-select">
+                <select name="year_level_id" class="form-select">
                     <option value="">All Years</option>
                     <option value="1" <?= $filter_year == '1' ? 'selected' : '' ?>>1st Year</option>
                     <option value="2" <?= $filter_year == '2' ? 'selected' : '' ?>>2nd Year</option>
@@ -204,7 +204,7 @@ $students = $stmt->fetchAll();
                                 <td><span class="badge bg-secondary"><?= htmlspecialchars($student['student_id'] ?? '') ?></span></td>
                                 <td class="fw-bold"><?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name']) ?></td>
                                 <td><?= htmlspecialchars(empty(trim($student['program_code'] ?? '')) ? 'N/A' : $student['program_code']) ?></td>
-                                <td><?= htmlspecialchars(empty(trim($student['current_year_level'] ?? '')) ? 'N/A' : $student['current_year_level']) ?></td>
+                                <td><?= htmlspecialchars(empty(trim($student['year_level_id'] ?? '')) ? 'N/A' : $student['year_level_id']) ?></td>
                                 <td><?= htmlspecialchars(empty(trim($student['latest_section'] ?? '')) ? 'N/A' : $student['latest_section']) ?></td>
                                 <td><?= htmlspecialchars(empty(trim($student['latest_semester'] ?? '')) ? 'N/A' : $student['latest_semester'] . ' Sem') ?></td>
                                 <td>

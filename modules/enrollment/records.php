@@ -5,14 +5,14 @@ require_once '../../config/db.php';
 include_once '../../includes/header.php';
 
 $term = $_GET['term'] ?? '2025-2026';
-$sem = $_GET['sem'] ?? '1st';
+$sem = $_GET['sem'] ?? 1;
 
 $stmt = $pdo->prepare("
     SELECT e.*, s.first_name, s.last_name, p.program_code
     FROM enrollments e
     JOIN students s ON e.student_id = s.student_id
     LEFT JOIN programs p ON s.program_id = p.program_id
-    WHERE e.academic_year = ? AND e.semester = ?
+    WHERE e.academic_year = ? AND e.semester_id = ?
     ORDER BY e.enrollment_date DESC
 ");
 $stmt->execute([$term, $sem]);
@@ -36,9 +36,9 @@ $records = $stmt->fetchAll();
             <div class="col-md-3 mb-3">
                 <label>Semester</label>
                 <select name="sem" class="form-select">
-                    <option value="1st" <?= $sem=='1st'?'selected':'' ?>>1st Sem</option>
-                    <option value="2nd" <?= $sem=='2nd'?'selected':'' ?>>2nd Sem</option>
-                    <option value="Summer" <?= $sem=='Summer'?'selected':'' ?>>Summer</option>
+                    <option value=1 <?= $sem==1?'selected':'' ?>>1st Sem</option>
+                    <option value=2 <?= $sem==2?'selected':'' ?>>2nd Sem</option>
+                    <option value=3 <?= $sem==3?'selected':'' ?>>Summer</option>
                 </select>
             </div>
             <div class="col-md-3 mb-3 mt-4">

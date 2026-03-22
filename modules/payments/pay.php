@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['amount'])) {
                 <p><strong>ID:</strong> <?= htmlspecialchars($enrollment['student_id']) ?></p>
                 <p><strong>Name:</strong> <?= htmlspecialchars($enrollment['last_name'] . ', ' . $enrollment['first_name']) ?></p>
                 <p><strong>Program:</strong> <?= htmlspecialchars($enrollment['program_code']) ?></p>
-                <p><strong>Term:</strong> <?= htmlspecialchars($enrollment['academic_year'] . ' - ' . $enrollment['semester']) ?></p>
+                <p><strong>Term:</strong> <?= htmlspecialchars($enrollment['academic_year'] . ' - ' . $enrollment['semester_id']) ?></p>
                 <hr>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Total Assessed:</span>

@@ -12,11 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 
 $student_id = $_POST['student_id'];
 $acad_year = $_POST['acad_year'];
-$semester = $_POST['semester'];
+$semester_id = $_POST['semester_id'];
 $total_units = (float)$_POST['total_units'];
 $assessed_amount = (float)$_POST['assessed_amount'];
 $program_id = !empty($_POST['program_id']) ? $_POST['program_id'] : null;
-$year_level = !empty($_POST['year_level']) ? $_POST['year_level'] : null;
+$year_level_id = !empty($_POST['year_level_id']) ? $_POST['year_level_id'] : null;
 $section = !empty($_POST['section']) ? $_POST['section'] : null;
 $schedule_ids = $_POST['schedule_ids'] ?? [];
 
@@ -30,13 +30,13 @@ try {
     // Begin Transaction
     $pdo->beginTransaction();
     
-    $updStu = $pdo->prepare("UPDATE students SET program_id = ?, current_year_level = ? WHERE student_id = ?");
-    $updStu->execute([$program_id ?: null, $year_level, $student_id]);
+    $updStu = $pdo->prepare("UPDATE students SET program_id = ?, year_level_id = ? WHERE student_id = ?");
+    $updStu->execute([$program_id ?: null, $year_level_id, $student_id]);
     $stmt = $pdo->prepare("
-        INSERT INTO enrollments (student_id, academic_year, semester, status, total_units, assessed_amount, program_id, section) 
+        INSERT INTO enrollments (student_id, academic_year, semester_id, status, total_units, assessed_amount, program_id, section) 
         VALUES (?, ?, ?, 'Enrolled', ?, ?, ?, ?)
     ");
-    $stmt->execute([$student_id, $acad_year, $semester, $total_units, $assessed_amount, $program_id, $section]);
+    $stmt->execute([$student_id, $acad_year, $semester_id, $total_units, $assessed_amount, $program_id, $section]);
     $enrollment_id = $pdo->lastInsertId();
 
     // 2. Link subjects (schedules) to enrollment and increment enrolled_count
@@ -81,7 +81,7 @@ try {
                 <div class="card-body py-5">
                     <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
                     <h2 class="text-success">Enrollment Successful!</h2>
-                    <p class="lead">Student <strong><?= htmlspecialchars($student_id) ?></strong> has been officially enrolled for <strong><?= htmlspecialchars("$acad_year - $semester") ?></strong>.</p>
+                    <p class="lead">Student <strong><?= htmlspecialchars($student_id) ?></strong> has been officially enrolled for <strong><?= htmlspecialchars("$acad_year - $semester_id") ?></strong>.</p>
                     
                     <div class="mt-5">
                         <a href="print_cor.php?id=<?= $enrollment_id ?>" class="btn btn-warning btn-lg me-2" target="_blank">

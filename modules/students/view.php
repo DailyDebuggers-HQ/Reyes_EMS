@@ -29,7 +29,7 @@ if (!$student) {
 // Fetch Enrollment History
 $enrollmentStmt = $pdo->prepare("
     SELECT e.*,
-        (SELECT MAX(curr.year_level) 
+        (SELECT MAX(curr.year_level_id) 
          FROM enrollment_schedules es 
          JOIN schedules s ON es.schedule_id = s.schedule_id 
          JOIN curriculum curr ON s.course_id = curr.course_id 
@@ -37,7 +37,7 @@ $enrollmentStmt = $pdo->prepare("
     FROM enrollments e
     WHERE e.student_id = ?
     ORDER BY e.academic_year DESC,
-             FIELD(e.semester, '2nd', '1st', 'Summer') DESC
+             e.semester_id DESC
 ");
 $enrollmentStmt->execute([$student['program_id'], $student_id]);
 $enrollments = $enrollmentStmt->fetchAll();
@@ -52,7 +52,7 @@ foreach ($enrollments as &$e) {
         $e['inferred_year_level'] = $e['curr_year_level'];
     } else {
         $offset = $latest_year - (int)substr($e['academic_year'], 0, 4);
-        $e['inferred_year_level'] = max(1, $student['current_year_level'] - $offset);
+        $e['inferred_year_level'] = max(1, $student['year_level_id'] - $offset);
     }
 }
 unset($e);
@@ -104,7 +104,7 @@ function getOrdinal($number) {
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <strong>Year Level</strong>
-                        <span class="text-end"><?= htmlspecialchars($student['current_year_level']) ?> Year</span>
+                        <span class="text-end"><?= htmlspecialchars($student['year_level_id']) ?> Year</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <strong>Section</strong>
@@ -131,7 +131,7 @@ function getOrdinal($number) {
                     <select class="form-select form-select-sm shadow-none" id="semesterSelect" onchange="showSemester(this.value)" style="min-width: 250px;">
                         <?php foreach ($enrollments as $index => $enrollment): ?>
                             <option value="<?= $enrollment['enrollment_id'] ?>">
-                                <?= getOrdinal($enrollment['inferred_year_level']) ?> Year • <?= htmlspecialchars($enrollment['semester']) ?> Semester • S.Y. <?= htmlspecialchars($enrollment['academic_year']) ?>
+                                <?= getOrdinal($enrollment['inferred_year_level']) ?> Year • <?= $enrollment['semester_id'] == 1 ? '1st' : ($enrollment['semester_id'] == 2 ? '2nd' : 'Summer') ?> Semester • S.Y. <?= htmlspecialchars($enrollment['academic_year']) ?>
                             </option>
                         <?php endforeach; ?>
                         <option value="all">Show All Semesters</option>
@@ -161,7 +161,7 @@ function getOrdinal($number) {
                             if ($enrollment['status'] == 'Pending') { $statusBadge = 'text-warning border-warning'; $statusText = 'PENDING'; }
                             if ($enrollment['status'] == 'Cancelled') { $statusBadge = 'text-danger border-danger'; $statusText = 'CANCELLED'; }
                         ?>
-                            <div class="semester-card mb-4" id="sem_<?= $enr_id ?>" <?= $index !== 0 ? 'style="display:none;"' : '' ?>>
+                            <div class="semester_id-card mb-4" id="sem_<?= $enr_id ?>" <?= $index !== 0 ? 'style="display:none;"' : '' ?>>
                                 <div class="bg-white border rounded p-0 overflow-hidden shadow-sm">
                                     
                                     <!-- Header Row matching Image -->
@@ -169,7 +169,7 @@ function getOrdinal($number) {
                                         <div class="bg-primary text-white rounded px-3 py-1 fw-bold small me-3">
                                             <?= getOrdinal($enrollment['inferred_year_level']) ?> YEAR
                                         </div>
-                                        <div class="fs-6 fw-bold me-3"><?= htmlspecialchars($enrollment['semester']) ?> Semester</div>
+                                        <div class="fs-6 fw-bold me-3"><?= $enrollment['semester_id'] == 1 ? '1st' : ($enrollment['semester_id'] == 2 ? '2nd' : 'Summer') ?> Semester</div>
                                         <div class="text-muted small">S.Y. <?= htmlspecialchars($enrollment['academic_year']) ?></div>
                                         <div class="ms-auto text-end">
                                              <a href="/EMS/modules/enrollment/print_cor.php?enrollment_id=<?= $enr_id ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0"><i class="fas fa-print"></i></a>
@@ -240,7 +240,7 @@ function getOrdinal($number) {
                     <div class="text-center py-5">
                         <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                         <h5>No Enrollment History</h5>
-                        <p class="text-muted">This student has not enrolled in any semester yet.</p>
+                        <p class="text-muted">This student has not enrolled in any semester_id yet.</p>
                         <a href="/EMS/modules/enrollment/step1.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-primary mt-2">Enroll Now</a>
                     </div>
                 <?php endif; ?>
@@ -251,7 +251,7 @@ function getOrdinal($number) {
 
 <script>
 function showSemester(enrId) {
-    const cards = document.querySelectorAll('.semester-card');
+    const cards = document.querySelectorAll('.semester_id-card');
     cards.forEach(card => {
         if (enrId === 'all') {
             card.style.display = 'block';

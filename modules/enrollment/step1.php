@@ -8,14 +8,14 @@ $student_id = $_GET['student_id'] ?? '';
 $term_code = $_GET['term_code'] ?? '';
 
 // Find the active/latest term
-$latestTermStmt = $pdo->query("SELECT academic_year, semester FROM enrollments ORDER BY academic_year DESC, semester DESC LIMIT 1");
+$latestTermStmt = $pdo->query("SELECT academic_year, semester_id FROM enrollments ORDER BY academic_year DESC, semester_id DESC LIMIT 1");
 $latestTerm = $latestTermStmt->fetch();
 $default_acad_year = $latestTerm ? $latestTerm['academic_year'] : '2025-2026';
-$default_semester = $latestTerm ? $latestTerm['semester'] : '1st';
+$default_semester = $latestTerm ? $latestTerm['semester_id'] : 1;
 
 // Default fallback if no term code
 $acad_year = $default_acad_year;
-$semester = $default_semester;
+$semester_id = $default_semester;
 
 if (!empty($term_code) && strlen($term_code) === 3) {
     // Parse term code (e.g. 271 -> 27 and 1)
@@ -29,15 +29,15 @@ if (!empty($term_code) && strlen($term_code) === 3) {
     
     // Determine Semester
     if ($term_suffix === '1') {
-        $semester = '1st';
+        $semester_id = 1;
     } elseif ($term_suffix === '2') {
-        $semester = '2nd';
+        $semester_id = 2;
     } elseif ($term_suffix === '0') {
-        $semester = 'Summer';
+        $semester_id = 3;
     }
-} else if (isset($_GET['acad_year']) && isset($_GET['semester'])) {
+} else if (isset($_GET['acad_year']) && isset($_GET['semester_id'])) {
     $acad_year = $_GET['acad_year'];
-    $semester = $_GET['semester'];
+    $semester_id = $_GET['semester_id'];
 }
 
 if (!$student_id) {
@@ -65,13 +65,13 @@ if (!$student) {
 $force_edit = isset($_GET['force_edit']) ? true : false;
 
 // Check if already enrolled in this specific term
-$checkEnrolled = $pdo->prepare("SELECT enrollment_id FROM enrollments WHERE student_id = ? AND academic_year = ? AND semester = ? AND status != 'Cancelled'");
-$checkEnrolled->execute([$student_id, $acad_year, $semester]);
+$checkEnrolled = $pdo->prepare("SELECT enrollment_id FROM enrollments WHERE student_id = ? AND academic_year = ? AND semester_id = ? AND status != 'Cancelled'");
+$checkEnrolled->execute([$student_id, $acad_year, $semester_id]);
 $already_enrolled = $checkEnrolled->fetch();
 
 // Auto-Load subjects from curriculum based on Student's Program & Year Level & selected Term
 $selected_program = $_GET['program_id'] ?? $student['program_id'];
-$selected_year_level = $_GET['year_level'] ?? $student['current_year_level'];
+$selected_year_level = $_GET['year_level_id'] ?? $student['year_level_id'];
 
 if (!$selected_program) {
     // Default to the first program in the system if the student is entirely new
@@ -83,11 +83,11 @@ $currStmt = $pdo->prepare("
     FROM curriculum cr
     JOIN courses c ON cr.course_id = c.course_id
     WHERE cr.program_id = ? 
-      AND cr.year_level = ? 
-      AND cr.semester = ?
+      AND cr.year_level_id = ? 
+      AND cr.semester_id = ?
 ");
 
-$currStmt->execute([$selected_program, $selected_year_level, $semester]);
+$currStmt->execute([$selected_program, $selected_year_level, $semester_id]);
 $curriculum_subjects = $currStmt->fetchAll();
 
 // We also need available schedules for these subjects so the user can select a section
@@ -120,7 +120,7 @@ $curriculum_subjects = $currStmt->fetchAll();
                     <tr><th style="width: 35%">ID:</th><td><span class="badge bg-secondary"><?= htmlspecialchars($student['student_id']) ?></span></td></tr>
                     <tr><th>Name:</th><td class="fw-bold"><?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?></td></tr>
                     <tr><th>Program:</th><td><?= htmlspecialchars($student['program_name'] ?? 'N/A') ?></td></tr>
-                    <tr><th>Year Level:</th><td><?= htmlspecialchars($student['current_year_level']) ?></td></tr>
+                    <tr><th>Year Level:</th><td><?= htmlspecialchars($student['year_level_id']) ?></td></tr>
                     <tr><th>Status:</th><td>
                         <?php 
                             $badge = 'bg-success';
@@ -152,15 +152,15 @@ $curriculum_subjects = $currStmt->fetchAll();
                         </div>
                         <div class="col-md-4">
                             <label>Semester</label>
-                            <select name="semester" class="form-select" onchange="this.form.submit()">
-                                <option value="1st" <?= $semester == '1st' ? 'selected' : '' ?>>1st Sem</option>
-                                <option value="2nd" <?= $semester == '2nd' ? 'selected' : '' ?>>2nd Sem</option>
-                                <option value="Summer" <?= $semester == 'Summer' ? 'selected' : '' ?>>Summer</option>
+                            <select name="semester_id" class="form-select" onchange="this.form.submit()">
+                                <option value=1 <?= $semester_id == 1 ? 'selected' : '' ?>>1st Sem</option>
+                                <option value=2 <?= $semester_id == 2 ? 'selected' : '' ?>>2nd Sem</option>
+                                <option value=3 <?= $semester_id == 3 ? 'selected' : '' ?>>Summer</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label>Year Level</label>
-                            <select name="year_level" class="form-select" onchange="this.form.submit()">
+                            <select name="year_level_id" class="form-select" onchange="this.form.submit()">
                                 <option value="1" <?= $selected_year_level == '1' ? 'selected' : '' ?>>1st Year</option>
                                 <option value="2" <?= $selected_year_level == '2' ? 'selected' : '' ?>>2nd Year</option>
                                 <option value="3" <?= $selected_year_level == '3' ? 'selected' : '' ?>>3rd Year</option>
@@ -199,7 +199,7 @@ $curriculum_subjects = $currStmt->fetchAll();
                     </div>
                 </form>
                 <div class="alert alert-info mt-3 mb-0">
-                    <i class="fas fa-info-circle"></i> Showing subjects for <strong>Year <?= htmlspecialchars($selected_year_level) ?> - <?= htmlspecialchars($semester) ?> Semester</strong> based on curriculum.
+                    <i class="fas fa-info-circle"></i> Showing subjects for <strong>Year <?= htmlspecialchars($selected_year_level) ?> - <?= htmlspecialchars($semester_id) ?> Semester</strong> based on curriculum.
                 </div>
             </div>
         </div>
@@ -211,11 +211,11 @@ $curriculum_subjects = $currStmt->fetchAll();
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="alert-heading text-warning mb-1"><i class="fas fa-exclamation-triangle"></i> Already Enrolled</h4>
-                <p class="mb-0 text-dark">This student is already officially enrolled for the <strong><?= htmlspecialchars($semester) ?> Semester, S.Y. <?= htmlspecialchars($acad_year) ?></strong>.</p>
+                <p class="mb-0 text-dark">This student is already officially enrolled for the <strong><?= htmlspecialchars($semester_id) ?> Semester, S.Y. <?= htmlspecialchars($acad_year) ?></strong>.</p>
             </div>
             <div>
                 <a href="/EMS/modules/students/view.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-outline-warning"><i class="fas fa-eye"></i> View Profile</a>
-                <a href="step1.php?student_id=<?= urlencode($student_id) ?>&acad_year=<?= urlencode($acad_year) ?>&semester=<?= urlencode($semester) ?>&program_id=<?= urlencode($selected_program) ?>&year_level=<?= urlencode($selected_year_level) ?>&section=<?= urlencode($selected_section ?? 'X') ?>&force_edit=1" class="btn btn-warning ms-2"><i class="fas fa-edit"></i> Force Modify Course/Subjects</a>
+                <a href="step1.php?student_id=<?= urlencode($student_id) ?>&acad_year=<?= urlencode($acad_year) ?>&semester_id=<?= urlencode($semester_id) ?>&program_id=<?= urlencode($selected_program) ?>&year_level_id=<?= urlencode($selected_year_level) ?>&section=<?= urlencode($selected_section ?? 'X') ?>&force_edit=1" class="btn btn-warning ms-2"><i class="fas fa-edit"></i> Force Modify Course/Subjects</a>
             </div>
         </div>
     </div>
@@ -225,9 +225,9 @@ $curriculum_subjects = $currStmt->fetchAll();
 <form action="step2_process.php" method="POST" id="enrollmentForm" <?= ($already_enrolled && !$force_edit) ? 'style="display:none;"' : '' ?>>
     <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
     <input type="hidden" name="acad_year" value="<?= htmlspecialchars($acad_year) ?>">
-    <input type="hidden" name="semester" value="<?= htmlspecialchars($semester) ?>">
+    <input type="hidden" name="semester_id" value="<?= htmlspecialchars($semester_id) ?>">
     <input type="hidden" name="program_id" value="<?= htmlspecialchars($selected_program) ?>">
-    <input type="hidden" name="year_level" value="<?= htmlspecialchars($selected_year_level) ?>">
+    <input type="hidden" name="year_level_id" value="<?= htmlspecialchars($selected_year_level) ?>">
     <input type="hidden" name="section" value="<?= htmlspecialchars($selected_section ?? 'X') ?>">
 
     <div class="card shadow-sm mb-4">
@@ -260,9 +260,9 @@ $curriculum_subjects = $currStmt->fetchAll();
                                         SELECT s.*, t.first_name, t.last_name
                                         FROM schedules s
                                         LEFT JOIN teachers t ON s.teacher_id = t.teacher_id
-                                        WHERE s.course_id = ? AND s.academic_year = ? AND s.semester = ? AND s.section_code = ?
+                                        WHERE s.course_id = ? AND s.academic_year = ? AND s.semester_id = ? AND s.section_code = ?
                                     ");
-                                    $schedStmt->execute([$subject['course_id'], $acad_year, $semester, $target_section]);
+                                    $schedStmt->execute([$subject['course_id'], $acad_year, $semester_id, $target_section]);
                                     $schedules = $schedStmt->fetchAll();
 
                                     // If no schedule exists for this specific section, skip showing the subject

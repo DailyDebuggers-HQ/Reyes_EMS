@@ -7,7 +7,7 @@ if(!$payment_id) die("Payment ID required.");
 
 // Fetch payment, enrollment and student info
 $stmt = $pdo->prepare("
-    SELECT p.*, e.academic_year, e.semester, s.first_name, s.last_name, s.student_id as student_no, pr.program_name 
+    SELECT p.*, e.academic_year, e.semester_id, s.first_name, s.last_name, s.student_id as student_no, pr.program_name 
     FROM payments p
     JOIN enrollments e ON p.enrollment_id = e.enrollment_id
     JOIN students s ON p.student_id = s.student_id
@@ -66,7 +66,7 @@ if(!$payment) die("Payment record not found.");
             <tr><th>Student ID:</th><td><?= htmlspecialchars($payment['student_no']) ?></td></tr>
             <tr><th>Received From:</th><td><strong><?= htmlspecialchars(strtoupper($payment['last_name'] . ', ' . $payment['first_name'])) ?></strong></td></tr>
             <tr><th>Program:</th><td><?= htmlspecialchars($payment['program_name'] ?? 'N/A') ?></td></tr>
-            <tr><th>Term Applied:</th><td><?= htmlspecialchars($payment['semester'] . ' Semester, A.Y. ' . $payment['academic_year']) ?></td></tr>
+            <tr><th>Term Applied:</th><td><?= htmlspecialchars($payment['semester_id'] . ' Semester, A.Y. ' . $payment['academic_year']) ?></td></tr>
             <tr><th>Particulars:</th><td><?= htmlspecialchars($payment['remarks'] ?: 'Tuition Fee Payment') ?></td></tr>
         </table>
 

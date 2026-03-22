@@ -74,7 +74,7 @@ $balance = $enrollment['assessed_amount'] - $total_paid;
             <div class="col-sm-5 text-end">
                 <table class="info-table ms-auto">
                     <tr><th>Academic Year:</th><td><?= htmlspecialchars($enrollment['academic_year']) ?></td></tr>
-                    <tr><th>Semester:</th><td><?= htmlspecialchars($enrollment['semester']) ?></td></tr>
+                    <tr><th>Semester:</th><td><?= htmlspecialchars($enrollment['semester_id']) ?></td></tr>
                     <tr><th>Date Printed:</th><td><?= date('M d, Y') ?></td></tr>
                 </table>
             </div>

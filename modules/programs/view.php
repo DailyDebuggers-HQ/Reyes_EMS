@@ -16,12 +16,12 @@ if(!$program) die("<div class='alert alert-danger'>Program not found.</div>");
 
 // Fetch Curriculum organized by Year Level and Semester
 $cStmt = $pdo->prepare("
-    SELECT c.*, cr.year_level, cr.semester 
+    SELECT c.*, cr.year_level_id, cr.semester_id 
     FROM curriculum cr
     JOIN courses c ON cr.course_id = c.course_id
     WHERE cr.program_id = ?
-    ORDER BY cr.year_level ASC, 
-             FIELD(cr.semester, '1st', '2nd', 'Summer') ASC, 
+    ORDER BY cr.year_level_id ASC, 
+             cr.semester_id ASC, 
              c.course_code ASC
 ");
 $cStmt->execute([$program_id]);
@@ -30,7 +30,7 @@ $raw_curriculum = $cStmt->fetchAll();
 // Group data internally using an array
 $curriculum = [];
 foreach($raw_curriculum as $row) {
-    $curriculum[$row['year_level']][$row['semester']][] = $row;
+    $curriculum[$row['year_level_id']][$row['semester_id']][] = $row;
 }
 ?>
 

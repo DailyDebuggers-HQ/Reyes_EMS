@@ -8,7 +8,7 @@ if(!$enrollment_id) die("Enrollment ID required.");
 
 // Fetch enrollment and student info
 $stmt = $pdo->prepare("
-    SELECT e.*, s.first_name, s.last_name, s.current_year_level, s.status, p.program_code, p.program_name 
+    SELECT e.*, s.first_name, s.last_name, s.year_level_id, s.status, p.program_code, p.program_name 
     FROM enrollments e
     JOIN students s ON e.student_id = s.student_id
     LEFT JOIN programs p ON s.program_id = p.program_id
@@ -72,8 +72,8 @@ $schedules = $schedStmt->fetchAll();
             </div>
             <div class="col-sm-4 text-end">
                 <table class="info-table ms-auto">
-                    <tr><th>Term:</th><td><?= htmlspecialchars($enrollment['semester'] . ' Sem, ' . $enrollment['academic_year']) ?></td></tr>
-                    <tr><th>Year Level:</th><td><?= htmlspecialchars($enrollment['current_year_level']) ?></td></tr>
+                    <tr><th>Term:</th><td><?= htmlspecialchars($enrollment['semester_id'] . ' Sem, ' . $enrollment['academic_year']) ?></td></tr>
+                    <tr><th>Year Level:</th><td><?= htmlspecialchars($enrollment['year_level_id']) ?></td></tr>
                     <tr><th>Status:</th><td><?= htmlspecialchars($enrollment['status']) ?></td></tr>
                 </table>
             </div>
