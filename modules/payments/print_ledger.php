@@ -58,7 +58,7 @@ $balance = $enrollment['assessed_amount'] - $total_paid;
 
     <div class="ledger-container">
         <div class="school-header">
-            <h2>UNIVERSITY OF EXCELLENCE</h2>
+            <h2>UA ACADEMY</h2>
             <p class="mb-0">Accounting Office</p>
             <h4 class="mt-3 text-uppercase fw-bold">Student Payment Ledger</h4>
         </div>
