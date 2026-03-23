@@ -72,6 +72,7 @@ $already_enrolled = $checkEnrolled->fetch();
 // Auto-Load subjects from curriculum based on Student's Program & Year Level & selected Term
 $selected_program = $_GET['program_id'] ?? $student['program_id'];
 $selected_year_level = $_GET['year_level_id'] ?? $student['year_level_id'];
+$selected_section = $_GET['section'] ?? 'X';
 
 if (!$selected_program) {
     // Default to the first program in the system if the student is entirely new
@@ -107,71 +108,155 @@ $curriculum_subjects = $currStmt->fetchAll();
 
 ?>
 
-<!-- Progress Bar -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center bg-light p-3 border rounded">
-            <span class="badge bg-primary fs-6">1. Term & Subjects</span>
-            <i class="fas fa-arrow-right text-muted"></i>
-            <span class="badge bg-secondary fs-6">2. Assessment</span>
-            <i class="fas fa-arrow-right text-muted"></i>
-            <span class="badge bg-secondary fs-6">3. Confirmation</span>
-        </div>
-    </div>
-</div>
+<style>
+    .enroll-step1 .flow-track {
+        border: 1px solid #dbe6f7;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #ffffff, #f8fbff);
+        padding: 0.9rem 1rem;
+    }
 
-<div class="row mb-4">
-    <!-- Student Information Card -->
-    <div class="col-md-5">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-user-graduate"></i> Student Target</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-borderless mb-0">
-                    <tr><th style="width: 35%">ID:</th><td><span class="badge bg-secondary"><?= htmlspecialchars($student['student_id']) ?></span></td></tr>
-                    <tr><th>Name:</th><td class="fw-bold"><?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?></td></tr>
-                    <tr><th>Program:</th><td><?= htmlspecialchars($student['program_name'] ?? 'N/A') ?></td></tr>
-                    <tr><th>Year Level:</th><td><?= htmlspecialchars($student['year_level_id']) ?></td></tr>
-                    <tr><th>Status:</th><td>
-                        <?php 
-                            $badge = 'bg-success';
-                            if ($student['status'] == 'Irregular') $badge = 'bg-warning text-dark';
-                        ?>
-                        <span class="badge <?= $badge ?>"><?= htmlspecialchars($student['status']) ?></span>
-                    </td></tr>
-                </table>
-            </div>
-        </div>
+    .enroll-step1 .flow-pill {
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 0.86rem;
+        padding: 0.34rem 0.84rem;
+        background: #6f7c8c;
+        color: #fff;
+    }
+
+    .enroll-step1 .flow-pill.active {
+        background: linear-gradient(145deg, #0d6efd, #368eff);
+    }
+
+    .enroll-step1 .glass-card {
+        border: 1px solid #dbe7f8;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 22px 40px -34px rgba(20, 55, 102, 0.62);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .enroll-step1 .glass-head {
+        border-bottom: 1px solid #e3ecf9;
+        background: linear-gradient(145deg, #f8fbff, #f2f7ff);
+        padding: 0.9rem 1rem;
+    }
+
+    .enroll-step1 .student-meta dt {
+        color: #5f7290;
+        font-weight: 700;
+    }
+
+    .enroll-step1 .student-meta dd {
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .enroll-step1 .term-hint {
+        border: 1px solid #cbe1ff;
+        border-radius: 12px;
+        background: #edf5ff;
+        color: #1f4677;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.68rem 0.78rem;
+    }
+
+    .enroll-step1 .subject-table thead th {
+        font-size: 0.82rem;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+        color: #587096;
+        background: #f7faff;
+    }
+
+    .enroll-step1 .subject-table td {
+        font-size: 0.94rem;
+    }
+
+    .enroll-step1 .sched-line {
+        font-size: 0.84rem;
+        color: #2d4768;
+        font-weight: 600;
+    }
+
+    .enroll-step1 .enrolled-warning {
+        border: 1px solid #f4d58b;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #fffaf0, #fff7df);
+        padding: 1rem;
+    }
+</style>
+
+<div class="enroll-step1">
+    <div class="flow-track d-flex justify-content-between align-items-center gap-2 mb-4">
+        <span class="flow-pill active">1. Term & Subjects</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="flow-pill">2. Assessment</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="flow-pill">3. Confirmation</span>
     </div>
 
-    <!-- Enrollment Term Selection -->
-    <div class="col-md-7">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Set Academic Term</h5>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="glass-card">
+                <div class="glass-head">
+                    <h5 class="mb-0"><i class="fas fa-user-graduate me-2"></i>Student Target</h5>
+                </div>
+                <div class="p-3 p-md-4">
+                    <?php
+                        $statusClass = $student['status'] === 'Irregular' ? 'bg-warning text-dark' : 'bg-success';
+                    ?>
+                    <dl class="row g-3 student-meta mb-0">
+                        <dt class="col-4">ID</dt>
+                        <dd class="col-8"><span class="badge bg-secondary"><?= htmlspecialchars($student['student_id']) ?></span></dd>
+
+                        <dt class="col-4">Name</dt>
+                        <dd class="col-8"><?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?></dd>
+
+                        <dt class="col-4">Program</dt>
+                        <dd class="col-8"><?= htmlspecialchars($student['program_name'] ?? 'N/A') ?></dd>
+
+                        <dt class="col-4">Year Level</dt>
+                        <dd class="col-8"><?= htmlspecialchars($student['year_level_id']) ?></dd>
+
+                        <dt class="col-4">Status</dt>
+                        <dd class="col-8"><span class="badge <?= $statusClass ?>"><?= htmlspecialchars($student['status']) ?></span></dd>
+                    </dl>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="GET" action="step1.php">
-                    <?php if ($force_edit): ?>
-                        <input type="hidden" name="force_edit" value="1">
-                    <?php endif; ?>
-                    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-                    <div class="row align-items-center mb-3">
+        </div>
+
+        <div class="col-lg-7">
+            <div class="glass-card">
+                <div class="glass-head">
+                    <h5 class="mb-0"><i class="fas fa-calendar-days me-2"></i>Academic Term Builder</h5>
+                </div>
+                <div class="p-3 p-md-4">
+                    <form method="GET" action="step1.php" class="row g-3 align-items-end">
+                        <?php if ($force_edit): ?>
+                            <input type="hidden" name="force_edit" value="1">
+                        <?php endif; ?>
+                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
+
                         <div class="col-md-4">
-                            <label>Academic Year</label>
+                            <label class="form-label small text-muted fw-semibold mb-1">Academic Year</label>
                             <input type="text" name="acad_year" class="form-control" value="<?= htmlspecialchars($acad_year) ?>" required>
                         </div>
+
                         <div class="col-md-4">
-                            <label>Semester</label>
+                            <label class="form-label small text-muted fw-semibold mb-1">Semester</label>
                             <select name="semester_id" class="form-select" onchange="this.form.submit()">
-                                <option value=1 <?= $semester_id == 1 ? 'selected' : '' ?>>1st Sem</option>
-                                <option value=2 <?= $semester_id == 2 ? 'selected' : '' ?>>2nd Sem</option>
-                                <option value=3 <?= $semester_id == 3 ? 'selected' : '' ?>>Summer</option>
+                                <option value="1" <?= $semester_id == 1 ? 'selected' : '' ?>>1st Sem</option>
+                                <option value="2" <?= $semester_id == 2 ? 'selected' : '' ?>>2nd Sem</option>
+                                <option value="3" <?= $semester_id == 3 ? 'selected' : '' ?>>Summer</option>
                             </select>
                         </div>
+
                         <div class="col-md-4">
-                            <label>Year Level</label>
+                            <label class="form-label small text-muted fw-semibold mb-1">Year Level</label>
                             <select name="year_level_id" class="form-select" onchange="this.form.submit()">
                                 <option value="1" <?= $selected_year_level == '1' ? 'selected' : '' ?>>1st Year</option>
                                 <option value="2" <?= $selected_year_level == '2' ? 'selected' : '' ?>>2nd Year</option>
@@ -179,16 +264,13 @@ $curriculum_subjects = $currStmt->fetchAll();
                                 <option value="4" <?= $selected_year_level == '4' ? 'selected' : '' ?>>4th Year</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row align-items-center">
+
                         <div class="col-md-5">
-                            <label>Program</label>
+                            <label class="form-label small text-muted fw-semibold mb-1">Program</label>
                             <select name="program_id" class="form-select" onchange="this.form.submit()">
-                                <?php 
-                                    $progStmt = $pdo->query("SELECT program_id, program_code, program_name FROM programs");
+                                <?php
+                                    $progStmt = $pdo->query("SELECT program_id, program_code FROM programs");
                                     $all_programs = $progStmt->fetchAll();
-                                    
-                                    // Make sure we carry over the previously decided fallback program
                                     foreach ($all_programs as $p):
                                 ?>
                                     <option value="<?= $p['program_id'] ?>" <?= $selected_program == $p['program_id'] ? 'selected' : '' ?>>
@@ -197,194 +279,175 @@ $curriculum_subjects = $currStmt->fetchAll();
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="col-md-4">
-                            <label>Section</label>
-                            <?php $selected_section = $_GET['section'] ?? 'X'; ?>
+                            <label class="form-label small text-muted fw-semibold mb-1">Section</label>
                             <select name="section" class="form-select" onchange="this.form.submit()">
                                 <option value="X" <?= $selected_section == 'X' ? 'selected' : '' ?>>X</option>
                                 <option value="Y" <?= $selected_section == 'Y' ? 'selected' : '' ?>>Y</option>
                             </select>
                         </div>
-                        <div class="col-md-3 mt-4">
-                            <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-sync"></i> Refresh</button>
+
+                        <div class="col-md-3 d-grid">
+                            <button type="submit" class="btn btn-outline-primary"><i class="fas fa-rotate me-1"></i>Refresh</button>
                         </div>
+                    </form>
+
+                    <div class="term-hint mt-3">
+                        <i class="fas fa-circle-info me-1"></i>
+                        Showing subjects for <strong>Year <?= htmlspecialchars($selected_year_level) ?> - <?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?></strong> based on curriculum.
                     </div>
-                </form>
-                <div class="alert alert-info mt-3 mb-0">
-                    <i class="fas fa-info-circle"></i> Showing subjects for <strong>Year <?= htmlspecialchars($selected_year_level) ?> - <?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?></strong> based on curriculum.
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<?php if ($already_enrolled && !$force_edit): ?>
-    <div class="alert alert-warning mb-4 shadow-sm border-warning">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="alert-heading text-warning mb-1"><i class="fas fa-exclamation-triangle"></i> Already Enrolled</h4>
-                <p class="mb-0 text-dark">This student is already officially enrolled for the <strong><?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?>, S.Y. <?= htmlspecialchars($acad_year) ?></strong>.</p>
-            </div>
-            <div>
-                <a href="<?= BASE_PATH ?>modules/students/view.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-outline-warning"><i class="fas fa-eye"></i> View Profile</a>
-                <a href="step1.php?student_id=<?= urlencode($student_id) ?>&acad_year=<?= urlencode($acad_year) ?>&semester_id=<?= urlencode($semester_id) ?>&program_id=<?= urlencode($selected_program) ?>&year_level_id=<?= urlencode($selected_year_level) ?>&section=<?= urlencode($selected_section ?? 'X') ?>&force_edit=1" class="btn btn-warning ms-2"><i class="fas fa-edit"></i> Force Modify Course/Subjects</a>
+    <?php if ($already_enrolled && !$force_edit): ?>
+        <div class="enrolled-warning mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <h5 class="mb-1 text-warning-emphasis"><i class="fas fa-triangle-exclamation me-2"></i>Already Enrolled</h5>
+                    <p class="mb-0">This student is already officially enrolled for <strong><?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?>, S.Y. <?= htmlspecialchars($acad_year) ?></strong>.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="<?= BASE_PATH ?>modules/students/view.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-eye me-1"></i>View Profile
+                    </a>
+                    <a href="step1.php?student_id=<?= urlencode($student_id) ?>&acad_year=<?= urlencode($acad_year) ?>&semester_id=<?= urlencode($semester_id) ?>&program_id=<?= urlencode($selected_program) ?>&year_level_id=<?= urlencode($selected_year_level) ?>&section=<?= urlencode($selected_section) ?>&force_edit=1" class="btn btn-sm btn-warning">
+                        <i class="fas fa-pen-to-square me-1"></i>Force Modify Subjects
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-<?php endif; ?>
-
-<!-- Subjects Selection Form -->
-<form action="step2_process.php" method="POST" id="enrollmentForm" <?= ($already_enrolled && !$force_edit) ? 'style="display:none;"' : '' ?>>
-    <?php if ($force_edit): ?>
-        <input type="hidden" name="force_edit" value="1">
     <?php endif; ?>
-    <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
-    <input type="hidden" name="acad_year" value="<?= htmlspecialchars($acad_year) ?>">
-    <input type="hidden" name="semester_id" value="<?= htmlspecialchars($semester_id) ?>">
-    <input type="hidden" name="program_id" value="<?= htmlspecialchars($selected_program) ?>">
-    <input type="hidden" name="year_level_id" value="<?= htmlspecialchars($selected_year_level) ?>">
-    <input type="hidden" name="section" value="<?= htmlspecialchars($selected_section ?? 'X') ?>">
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-book"></i> Available Curriculum Subjects</h5>
-            <span class="badge bg-light text-dark">Total Units: <span id="totalUnitsBadge">0.00</span></span>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-3" style="width: 50px;">
-                            <input type="checkbox" id="checkAll" class="form-check-input" checked>
-                        </th>
-                        <th>Course Code</th>
-                        <th>Course Description</th>
-                        <th>Units</th>
-                        <th>Schedule/Section</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (count($curriculum_subjects) > 0): ?>
-                        <?php foreach ($curriculum_subjects as $index => $subject): ?>
-                            <?php
-                                    // Fetch available schedules for this subject in the current term
-                                    $target_section = current(explode('-', $selected_section ?? 'X')); // Just in case it's Sec-X
-                                    if ($target_section !== 'X' && $target_section !== 'Y') $target_section = 'X';
-                                    
-                                    $schedStmt = $pdo->prepare("
-                                        SELECT s.*, t.first_name, t.last_name
-                                        FROM schedules s
-                                        LEFT JOIN teachers t ON s.teacher_id = t.teacher_id
-                                        WHERE s.course_id = ? AND s.academic_year = ? AND s.semester_id = ? AND s.section_code = ?
-                                    ");
+    <form action="step2_process.php" method="POST" id="enrollmentForm" <?= ($already_enrolled && !$force_edit) ? 'style="display:none;"' : '' ?>>
+        <?php if ($force_edit): ?>
+            <input type="hidden" name="force_edit" value="1">
+        <?php endif; ?>
+        <input type="hidden" name="student_id" value="<?= htmlspecialchars($student_id) ?>">
+        <input type="hidden" name="acad_year" value="<?= htmlspecialchars($acad_year) ?>">
+        <input type="hidden" name="semester_id" value="<?= htmlspecialchars($semester_id) ?>">
+        <input type="hidden" name="program_id" value="<?= htmlspecialchars($selected_program) ?>">
+        <input type="hidden" name="year_level_id" value="<?= htmlspecialchars($selected_year_level) ?>">
+        <input type="hidden" name="section" value="<?= htmlspecialchars($selected_section) ?>">
+
+        <div class="glass-card mb-3">
+            <div class="glass-head d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>Curriculum Subject Grid</h5>
+                <span class="badge bg-primary-subtle text-primary">Selected Units: <span id="totalUnitsBadge">0.00</span></span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle subject-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-3" style="width: 52px;"><input type="checkbox" id="checkAll" class="form-check-input" checked></th>
+                            <th>Course Code</th>
+                            <th>Course Description</th>
+                            <th class="text-center">Units</th>
+                            <th>Schedule / Section</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($curriculum_subjects) > 0): ?>
+                            <?php foreach ($curriculum_subjects as $subject): ?>
+                                <?php
+                                    $target_section = current(explode('-', $selected_section));
+                                    if ($target_section !== 'X' && $target_section !== 'Y') {
+                                        $target_section = 'X';
+                                    }
+
+                                    $schedStmt = $pdo->prepare("SELECT s.*, t.first_name, t.last_name FROM schedules s LEFT JOIN teachers t ON s.teacher_id = t.teacher_id WHERE s.course_id = ? AND s.academic_year = ? AND s.semester_id = ? AND s.section_code = ?");
                                     $schedStmt->execute([$subject['course_id'], $acad_year, $semester_id, $target_section]);
                                     $schedules = $schedStmt->fetchAll();
-                                    
-                                    // Make sure a subject appears in summer even if there's no official schedule assigned yet
-                                    if(count($schedules) == 0 && $semester_id == 3) {
+
+                                    if (count($schedules) === 0 && $semester_id == 3) {
                                         $insertSched = $pdo->prepare("INSERT INTO schedules (course_id, academic_year, semester_id, days, time_start, time_end, room, capacity, section_code) VALUES (?, ?, ?, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, ?)");
                                         $insertSched->execute([$subject['course_id'], $acad_year, $semester_id, $target_section]);
-                                        
                                         $schedStmt->execute([$subject['course_id'], $acad_year, $semester_id, $target_section]);
                                         $schedules = $schedStmt->fetchAll();
                                     }
 
-                                    // If no schedule exists for this specific section, skip showing the subject
-                                    if(count($schedules) == 0) {
+                                    if (count($schedules) === 0) {
                                         continue;
                                     }
+
+                                    $sched = $schedules[0];
+                                    $disp_section = $selected_section;
+                                    $label = "{$disp_section} | {$sched['days']} " . date('h:i A', strtotime($sched['time_start'])) . " - " . date('h:i A', strtotime($sched['time_end'])) . " | Room: {$sched['room']}";
                                 ?>
-                            <tr>
-                                <td class="ps-3">
-                                    <input type="checkbox" class="form-check-input subject-checkbox" 
-                                           name="subjects[]" value="<?= $subject['course_id'] ?>" 
-                                           data-units="<?= $subject['total_units'] ?>" checked>
-                                </td>
-                                <td class="fw-bold"><?= htmlspecialchars($subject['course_code']) ?></td>
-                                <td><?= htmlspecialchars($subject['course_name']) ?></td>
-                                <td><?= htmlspecialchars($subject['total_units']) ?></td>
-                                <td>
-                                    <?php if(count($schedules) > 0): ?>
-                                        <?php 
-                                            // Automatically pick the first schedule
-                                            $sched = $schedules[0]; 
-                                            $disp_section = $selected_section ?? 'X';
-                                            $label = "{$disp_section} | {$sched['days']} " . date('h:i A', strtotime($sched['time_start'])) . " - " . date('h:i A', strtotime($sched['time_end'])) . " | Room: {$sched['room']}";
-                                        ?>
+                                <tr>
+                                    <td class="ps-3">
+                                        <input
+                                            type="checkbox"
+                                            class="form-check-input subject-checkbox"
+                                            name="subjects[]"
+                                            value="<?= $subject['course_id'] ?>"
+                                            data-units="<?= $subject['total_units'] ?>"
+                                            checked
+                                        >
+                                    </td>
+                                    <td class="fw-bold"><?= htmlspecialchars($subject['course_code']) ?></td>
+                                    <td><?= htmlspecialchars($subject['course_name']) ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($subject['total_units']) ?></td>
+                                    <td>
                                         <input type="hidden" name="schedule_<?= $subject['course_id'] ?>" value="<?= $sched['schedule_id'] ?>">
-                                        <div class="small fw-semibold text-dark"><?= htmlspecialchars($label) ?></div>
-                                    <?php else: ?>
-                                        <div class="text-danger small"><i class="fas fa-exclamation-triangle"></i> No schedule available</div>
-                                    <?php endif; ?>
-                                </td>
+                                        <span class="sched-line"><?= htmlspecialchars($label) ?></span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No subjects found in curriculum for this term.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr><td colspan="5" class="text-center py-4">No subjects found in curriculum for this term.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-3 d-flex justify-content-end border-top">
+                <button type="submit" class="btn btn-success" id="btnNext" <?= count($curriculum_subjects) == 0 ? 'disabled' : '' ?>>
+                    Proceed to Assessment <i class="fas fa-arrow-right ms-1"></i>
+                </button>
+            </div>
         </div>
-        <div class="card-footer text-end">
-            <button type="submit" class="btn btn-success btn-lg" id="btnNext" <?= count($curriculum_subjects) == 0 ? 'disabled' : '' ?>>
-                Proceed to Assessment <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const checkAll = document.getElementById('checkAll');
-        const checkboxes = document.querySelectorAll('.subject-checkbox');
-        const totalUnitsBadge = document.getElementById('totalUnitsBadge');
-        
-        function calculateTotalUnits() {
-            let total = 0;
-            checkboxes.forEach(cb => {
-                if(cb.checked) {
-                    total += parseFloat(cb.getAttribute('data-units'));
-                }
-            });
+document.addEventListener('DOMContentLoaded', function () {
+    const checkAll = document.getElementById('checkAll');
+    const checkboxes = document.querySelectorAll('.subject-checkbox');
+    const totalUnitsBadge = document.getElementById('totalUnitsBadge');
+
+    function calculateTotalUnits() {
+        let total = 0;
+        checkboxes.forEach(function (cb) {
+            if (cb.checked) {
+                total += parseFloat(cb.getAttribute('data-units'));
+            }
+        });
+        if (totalUnitsBadge) {
             totalUnitsBadge.innerText = total.toFixed(2);
         }
+    }
 
-        if(checkAll) {
-            checkAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                toggleSelectRequirement();
-                calculateTotalUnits();
+    if (checkAll) {
+        checkAll.addEventListener('change', function () {
+            checkboxes.forEach(function (cb) {
+                cb.checked = checkAll.checked;
             });
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-                toggleSelectRequirement();
-                calculateTotalUnits();
-            });
+            calculateTotalUnits();
         });
+    }
 
-        // Makes the select required only if the checkbox for that subject is checked
-        function toggleSelectRequirement() {
-            checkboxes.forEach(cb => {
-                const tr = cb.closest('tr');
-                const selectBox = tr.querySelector('.sched-select');
-                if(selectBox) {
-                    if(cb.checked) {
-                        selectBox.setAttribute('required', 'required');
-                        selectBox.removeAttribute('disabled');
-                    } else {
-                        selectBox.removeAttribute('required');
-                        selectBox.setAttribute('disabled', 'disabled');
-                    }
-                }
-            });
-        }
-
-        // Initialize
-        toggleSelectRequirement();
-        calculateTotalUnits();
+    checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', calculateTotalUnits);
     });
+
+    calculateTotalUnits();
+});
 </script>
 
 <?php include_once '../../includes/footer.php'; ?>

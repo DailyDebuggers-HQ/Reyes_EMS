@@ -1,47 +1,172 @@
 <?php
-// modules/enrollment/index.php 
-// Enrollment Dashboard - Quick lookup and Records redirect
+// modules/enrollment/index.php
+// Enrollment Dashboard - New Intake Layout
 require_once '../../config/db.php';
 include_once '../../includes/header.php';
 ?>
 
-<div class="row mb-3">
-    <div class="col-md-8">
-        <h2><i class="fas fa-user-plus text-primary"></i> Enrollment Process</h2>
-        <p class="text-muted">Start a new enrollment by searching for a student or selecting from the masterlist.</p>
-    </div>
-</div>
+<style>
+    .enrollment-intake .intro-card {
+        position: relative;
+        border: 1px solid #d9e6fb;
+        border-radius: 22px;
+        background: linear-gradient(145deg, #ffffff, #f4f8ff);
+        padding: 1.4rem;
+        overflow: hidden;
+        box-shadow: 0 24px 44px -36px rgba(18, 61, 122, 0.65);
+    }
 
-<div class="row">
-    <div class="col-md-6 text-center">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body py-5">
-                <i class="fas fa-search fa-4x text-muted mb-3"></i>
-                <h4>Search & Enroll</h4>
-                <p>Quick lookup by Student ID to start their enrollment.</p>
-                <form action="step1.php" method="GET" class="mt-4 px-4">
-                    <div class="row g-2 mb-2">
-                        <div class="col-md-5">
-                            <input type="text" name="term_code" id="term_code" class="form-control" placeholder="Term Code (e.g. 251)" required title="251=2024-2025 1st Sem, 252=2nd Sem, 250=Summer" onkeyup="previewTerm(this.value)">
-                        </div>
-                        <div class="col-md-7">
-                            <input type="text" name="student_id" class="form-control" placeholder="Student ID (e.g. 2025-001)" required>
-                        </div>
-                    </div>
-                    <div id="term_preview" class="text-start mb-3 text-primary fw-bold" style="min-height: 24px; font-size: 0.9em;"></div>
-                    <button class="btn btn-primary w-100" type="submit">Start Enrollment</button>
-                </form>
+    .enrollment-intake .intro-card::after {
+        content: '';
+        position: absolute;
+        right: -50px;
+        top: -50px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(13, 110, 253, 0.2), rgba(13, 110, 253, 0));
+        pointer-events: none;
+    }
+
+    .enrollment-intake .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.28rem 0.62rem;
+        color: #0d4aa6;
+        background: #e8f1ff;
+    }
+
+    .enrollment-intake .workflow-chip {
+        border: 1px dashed #c8d8f6;
+        border-radius: 999px;
+        background: #fff;
+        color: #3a587e;
+        font-size: 0.76rem;
+        font-weight: 700;
+        padding: 0.26rem 0.6rem;
+    }
+
+    .enrollment-intake .action-card {
+        border: 1px solid #e1ebfb;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 20px 38px -34px rgba(24, 56, 102, 0.58);
+        height: 100%;
+    }
+
+    .enrollment-intake .action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.15rem;
+        color: #0d6efd;
+        background: linear-gradient(145deg, #e8f1ff, #f3f8ff);
+        border: 1px solid #d8e6ff;
+    }
+
+    .enrollment-intake .term-preview {
+        min-height: 24px;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+</style>
+
+<div class="enrollment-intake">
+    <div class="intro-card mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <span class="eyebrow"><i class="fas fa-sparkles"></i> Enrollment Hub</span>
+                <h2 class="mt-2 mb-1"><i class="fas fa-user-plus text-primary me-2"></i>Start New Student Enrollment</h2>
+                <p class="text-muted mb-0">Use direct intake for quick enrollment, or open the masterlist for assisted selection.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="workflow-chip">1. Validate term</span>
+                <span class="workflow-chip">2. Select student</span>
+                <span class="workflow-chip">3. Build schedule</span>
             </div>
         </div>
     </div>
-    <div class="col-md-6 text-center">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body py-5">
-                <i class="fas fa-list fa-4x text-muted mb-3"></i>
-                <h4>Browse Masterlist</h4>
-                <p>View all students and filter by program or year level to enroll.</p>
-                <div class="mt-4">
-                    <a href="<?= BASE_PATH ?>modules/students/index.php" class="btn btn-secondary">Go to Student List <i class="fas fa-arrow-right"></i></a>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="action-card p-4 h-100">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="action-icon"><i class="fas fa-id-card"></i></div>
+                    <div>
+                        <h4 class="mb-1">Direct Intake</h4>
+                        <p class="text-muted mb-0">Enter the term code and student ID to proceed directly to enrollment step 1.</p>
+                    </div>
+                </div>
+
+                <form action="step1.php" method="GET" class="row g-2">
+                    <div class="col-md-5">
+                        <label for="term_code" class="form-label small text-muted fw-semibold mb-1">Term Code</label>
+                        <input
+                            type="text"
+                            name="term_code"
+                            id="term_code"
+                            class="form-control"
+                            placeholder="e.g. 251"
+                            required
+                            title="251=2024-2025 1st Sem, 252=2nd Sem, 250=Summer"
+                            onkeyup="previewTerm(this.value)"
+                        >
+                    </div>
+                    <div class="col-md-7">
+                        <label for="student_id" class="form-label small text-muted fw-semibold mb-1">Student ID</label>
+                        <input
+                            type="text"
+                            name="student_id"
+                            id="student_id"
+                            class="form-control"
+                            placeholder="e.g. 2025-001"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-12">
+                        <div id="term_preview" class="term-preview text-primary"></div>
+                    </div>
+
+                    <div class="col-12 d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-play me-2"></i>Proceed To Step 1
+                        </button>
+                        <a href="<?= BASE_PATH ?>modules/enrollment/records.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-folder-open me-2"></i>View Enrollment Records
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="action-card p-4 h-100 d-flex flex-column">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="action-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h4 class="mb-1">Masterlist Assisted Flow</h4>
+                        <p class="text-muted mb-0">Search, filter, and confirm student details first before starting enrollment.</p>
+                    </div>
+                </div>
+
+                <div class="mt-2 small text-muted">
+                    Recommended for enrollees with incomplete profile data or uncertain program/year details.
+                </div>
+
+                <div class="mt-auto pt-4 d-grid gap-2">
+                    <a href="<?= BASE_PATH ?>modules/students/index.php" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Open Student Masterlist
+                    </a>
+                    <a href="<?= BASE_PATH ?>modules/students/index.php?status=Active" class="btn btn-light border">
+                        <i class="fas fa-filter me-2"></i>Open Active Students
+                    </a>
                 </div>
             </div>
         </div>
@@ -51,26 +176,29 @@ include_once '../../includes/header.php';
 <script>
 function previewTerm(code) {
     const preview = document.getElementById('term_preview');
-    if(code.length === 3) {
-        let yrPrefix = parseInt(code.substring(0,2));
-        let termSuffix = code.substring(2,3);
-        
-        if(isNaN(yrPrefix)) return;
-        
-        let endYear = 2000 + yrPrefix;
-        let startYear = endYear - 1;
-        let acadYear = startYear + '-' + endYear;
-        
-        let semester_id = '';
-        if(termSuffix === '1') semester_id = '1st Sem';
-        else if(termSuffix === '2') semester_id = '2nd Sem';
-        else if(termSuffix === '0') semester_id = 'Summer';
-        else {
-            preview.innerHTML = '<span class="text-danger">Invalid Term Suffix</span>';
+    if (code.length === 3) {
+        const yrPrefix = parseInt(code.substring(0, 2), 10);
+        const termSuffix = code.substring(2, 3);
+
+        if (isNaN(yrPrefix)) {
+            preview.innerHTML = '<span class="text-danger">Invalid term code</span>';
             return;
         }
-        
-        preview.innerHTML = `<i class="fas fa-check-circle"></i> SY ${acadYear}, ${semester_id}`;
+
+        const endYear = 2000 + yrPrefix;
+        const startYear = endYear - 1;
+        const acadYear = startYear + '-' + endYear;
+
+        let semesterId = '';
+        if (termSuffix === '1') semesterId = '1st Semester';
+        else if (termSuffix === '2') semesterId = '2nd Semester';
+        else if (termSuffix === '0') semesterId = 'Summer';
+        else {
+            preview.innerHTML = '<span class="text-danger">Invalid term suffix</span>';
+            return;
+        }
+
+        preview.innerHTML = `<i class="fas fa-check-circle me-1"></i>SY ${acadYear} | ${semesterId}`;
     } else {
         preview.innerHTML = '';
     }

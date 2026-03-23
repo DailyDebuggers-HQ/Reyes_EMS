@@ -139,117 +139,255 @@ if ($filter_year) {
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $students = $stmt->fetchAll();
+
+$totalShown = count($students);
+$enrolledShown = 0;
+$regularShown = 0;
+
+foreach ($students as $studentItem) {
+    if ((int)($studentItem['is_currently_enrolled'] ?? 0) > 0) {
+        $enrolledShown++;
+    }
+    if (($studentItem['status'] ?? '') === 'Regular') {
+        $regularShown++;
+    }
+}
+
+function formatSectionLabel(array $student): string {
+    $rawSection = trim((string)($student['latest_section'] ?? ''));
+    if ($rawSection !== '' && strtoupper($rawSection) !== 'X') {
+        $normalized = strtoupper($rawSection);
+        return $normalized === 'A' || $normalized === 'B' ? $normalized : $rawSection;
+    }
+
+    $id = (string)($student['student_id'] ?? '');
+    $lastDigit = null;
+    for ($i = strlen($id) - 1; $i >= 0; $i--) {
+        if (ctype_digit($id[$i])) {
+            $lastDigit = (int)$id[$i];
+            break;
+        }
+    }
+
+    if ($lastDigit === null) {
+        return 'A';
+    }
+
+    return $lastDigit % 2 === 0 ? 'A' : 'B';
+}
 ?>
 
-<div class="row mb-3">
-    <div class="col-md-6">
-        <h2><i class="fas fa-users text-primary"></i> Student Masterlist</h2>
-        <p class="text-muted">Browse and select students for enrollment.</p>
-    </div>
-    <div class="col-md-6 text-end">
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newStudentModal"><i class="fas fa-plus"></i> New Student</button>
-    </div>
-</div>
+<style>
+    .students-page .hero-panel {
+        border: 1px solid #dfe8f5;
+        border-radius: 18px;
+        background: linear-gradient(145deg, #ffffff, #f8fbff);
+        box-shadow: 0 26px 42px -36px rgba(20, 51, 91, 0.55);
+    }
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body bg-light">
-        <form method="GET" class="row border-bottom pb-3 mb-3">
-            <div class="col-md-4 mb-2">
-                <input type="text" name="search" class="form-control" placeholder="Search ID or Name..." value="<?= htmlspecialchars($search) ?>">
-            </div>
-            <div class="col-md-3 mb-2">
-                <select name="program_id" class="form-select">
-                    <option value="">All Programs</option>
-                    <?php foreach ($programs as $prog): ?>
-                        <option value="<?= $prog['program_id'] ?>" <?= $filter_program == $prog['program_id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($prog['program_code']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2 mb-2">
-                <select name="year_level_id" class="form-select">
-                    <option value="">All Years</option>
-                    <option value="1" <?= $filter_year == '1' ? 'selected' : '' ?>>1st Year</option>
-                    <option value="2" <?= $filter_year == '2' ? 'selected' : '' ?>>2nd Year</option>
-                    <option value="3" <?= $filter_year == '3' ? 'selected' : '' ?>>3rd Year</option>
-                    <option value="4" <?= $filter_year == '4' ? 'selected' : '' ?>>4th Year</option>
-                </select>
-            </div>
-            <div class="col-md-3 mb-2">
-                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filter</button>
-            </div>
-        </form>
+    .students-page .hero-chip {
+        padding: 0.65rem 0.75rem;
+        border: 1px solid #e3ebf7;
+        border-radius: 12px;
+        background: #fff;
+    }
 
+    .students-page .hero-chip .value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .students-page .hero-chip .label {
+        font-size: 0.8rem;
+        color: #728399;
+        margin-top: 0.2rem;
+    }
+
+    .students-page .table td,
+    .students-page .table th {
+        white-space: nowrap;
+    }
+
+    .students-page .name-cell {
+        min-width: 220px;
+    }
+
+    .students-page .id-pill {
+        background: #eef4ff;
+        color: #1f59b7;
+        border: 1px solid #d9e6ff;
+        border-radius: 999px;
+        padding: 0.35rem 0.58rem;
+        font-weight: 700;
+        font-size: 0.79rem;
+    }
+
+    .students-page .section-pill {
+        background: #eef9f2;
+        color: #1f8f53;
+        border: 1px solid #d4f0df;
+        border-radius: 999px;
+        padding: 0.28rem 0.52rem;
+        font-weight: 700;
+        font-size: 0.78rem;
+    }
+
+    .students-page .action-set {
+        min-width: 180px;
+    }
+
+    .students-page .action-set .btn {
+        margin: 0.12rem;
+    }
+
+    .students-page .masterlist-filter .form-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .students-page .masterlist-filter .form-control,
+    .students-page .masterlist-filter .form-select {
+        min-height: 36px;
+        font-size: 0.88rem;
+        border-radius: 10px;
+        padding-top: 0.28rem;
+        padding-bottom: 0.28rem;
+        padding-left: 0.62rem;
+        padding-right: 0.62rem;
+    }
+
+    .students-page .masterlist-filter .btn {
+        min-height: 36px;
+        font-size: 0.84rem;
+    }
+</style>
+
+<div class="students-page">
+    <div class="hero-panel p-4 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <h2 class="mb-1"><i class="fas fa-users me-2 text-primary"></i>Student Directory</h2>
+                <p class="text-muted mb-0">Professional masterlist for student profiles, enrollment actions, and payment routing.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="hero-chip text-center">
+                            <div class="value"><?= $totalShown ?></div>
+                            <div class="label">Results</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="hero-chip text-center">
+                            <div class="value"><?= $enrolledShown ?></div>
+                            <div class="label">Enrolled</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="hero-chip text-center">
+                            <div class="value"><?= $regularShown ?></div>
+                            <div class="label">Regular</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+                <div>
+                    <h5 class="mb-1">Student Masterlist</h5>
+                    <p class="text-muted mb-0">Search by ID/name and narrow by program or year level.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="badge bg-primary-subtle text-primary">SY <?= htmlspecialchars($active_academic_year) ?> | <?= $active_semester == 3 ? 'Summer' : $active_semester . ' Sem' ?></span>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#newStudentModal"><i class="fas fa-plus me-1"></i>New Student</button>
+                </div>
+            </div>
+
+            <form method="GET" class="row g-2 align-items-end masterlist-filter">
+                <div class="col-lg-4">
+                    <label class="form-label small text-muted mb-1">Keyword</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search ID or full name" value="<?= htmlspecialchars($search) ?>">
+                </div>
+                <div class="col-lg-3">
+                    <label class="form-label small text-muted mb-1">Program</label>
+                    <select name="program_id" class="form-select">
+                        <option value="">All Programs</option>
+                        <?php foreach ($programs as $prog): ?>
+                            <option value="<?= $prog['program_id'] ?>" <?= $filter_program == $prog['program_id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($prog['program_code']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label small text-muted mb-1">Year Level</label>
+                    <select name="year_level_id" class="form-select">
+                        <option value="">All Years</option>
+                        <option value="1" <?= $filter_year == '1' ? 'selected' : '' ?>>1st Year</option>
+                        <option value="2" <?= $filter_year == '2' ? 'selected' : '' ?>>2nd Year</option>
+                        <option value="3" <?= $filter_year == '3' ? 'selected' : '' ?>>3rd Year</option>
+                        <option value="4" <?= $filter_year == '4' ? 'selected' : '' ?>>4th Year</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sliders me-2"></i>Apply</button>
+                    <a href="index.php" class="btn btn-outline-secondary"><i class="fas fa-rotate-left"></i></a>
+                </div>
+            </form>
+        </div>
         <div class="table-responsive">
-            <table class="table table-hover table-striped">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
                         <th>Student ID</th>
-                        <th>Full Name</th>
+                        <th>Student Name</th>
+                        <th>Gender</th>
                         <th>Program</th>
                         <th>Year</th>
                         <th>Section</th>
                         <th>Semester</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (count($students) > 0): ?>
+                    <?php if ($totalShown > 0): ?>
                         <?php $seq = 1; foreach ($students as $student): ?>
                             <tr>
                                 <td><?= $seq++ ?></td>
-                                <td><span class="badge bg-secondary"><?= htmlspecialchars($student['student_id'] ?? '') ?></span></td>
-                                <td class="fw-bold"><?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name']) ?></td>
+                                <td><span class="id-pill"><?= htmlspecialchars($student['student_id'] ?? '') ?></span></td>
+                                <td class="name-cell fw-bold"><?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name']) ?></td>
+                                <td><?= htmlspecialchars(empty(trim((string)($student['gender'] ?? ''))) ? 'N/A' : $student['gender']) ?></td>
                                 <td><?= htmlspecialchars(empty(trim($student['program_code'] ?? '')) ? 'N/A' : $student['program_code']) ?></td>
                                 <td><?= htmlspecialchars(empty(trim($student['year_level_id'] ?? '')) ? 'N/A' : $student['year_level_id']) ?></td>
-                                <td><?= htmlspecialchars(empty(trim($student['latest_section'] ?? '')) ? 'N/A' : $student['latest_section']) ?></td>
+                                <td><span class="section-pill"><?= htmlspecialchars(formatSectionLabel($student)) ?></span></td>
                                 <td><?= htmlspecialchars(empty(trim($student['latest_semester'] ?? '')) ? 'N/A' : ($student['latest_semester'] == 3 ? 'Summer' : $student['latest_semester'] . ' Sem')) ?></td>
                                 <td>
-                                    <?php 
+                                    <?php
                                         $badgeClass = 'bg-success';
-                                        if ($student['status'] == 'Irregular') $badgeClass = 'bg-warning text-dark';
-                                        if ($student['status'] == 'Dropped') $badgeClass = 'bg-danger';
+                                        if (($student['status'] ?? '') === 'Irregular') {
+                                            $badgeClass = 'bg-warning text-dark';
+                                        }
+                                        if (($student['status'] ?? '') === 'Dropped') {
+                                            $badgeClass = 'bg-danger';
+                                        }
                                     ?>
                                     <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($student['status']) ?></span>
                                 </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="view.php?student_id=<?= urlencode($student['student_id']) ?>" class="btn btn-sm btn-info text-white">
-                                            <i class="fas fa-eye"></i> Profile
-                                        </a>
-                                        
-                                        <a href="edit.php?student_id=<?= urlencode($student['student_id']) ?>" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
+                                <td class="text-end">
+                                    <div class="action-set d-inline-flex flex-wrap justify-content-end">
+                                        <a href="view.php?student_id=<?= urlencode($student['student_id']) ?>" class="btn btn-sm btn-outline-primary" title="Open Profile"><i class="fas fa-eye me-1"></i>Profile</a>
 
-                                        <?php if (!empty($student['latest_enrollment_id'])): ?>
-                                            <a href="../payments/pay.php?enrollment_id=<?= urlencode($student['latest_enrollment_id']) ?>" class="btn btn-sm btn-success text-white">
-                                                <i class="fas fa-money-bill-wave"></i> Pay
-                                            </a>
-                                        <?php else: ?>
-                                            <button class="btn btn-sm btn-secondary" disabled>
-                                                <i class="fas fa-money-bill-wave"></i> Pay
-                                            </button>
-                                        <?php endif; ?>
-
-                                        <?php if ($student['is_currently_enrolled'] > 0): ?>
-                                            <a href="#" onclick="if(confirm('This student is already enrolled. Do you want to forcefully edit their subjects or re-enroll them?')) { window.location.href='<?= BASE_PATH ?>modules/enrollment/step1.php?student_id=<?= urlencode($student['student_id']) ?>&force_edit=1'; } return false;" class="btn btn-sm btn-secondary">
-                                                <i class="fas fa-check-circle"></i> Enrolled
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="<?= BASE_PATH ?>modules/enrollment/step1.php?student_id=<?= urlencode($student['student_id']) ?>" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-check-circle"></i> Enroll
-                                            </a>
-                                        <?php endif; ?>
                                         <form method="POST" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this student?');">
                                             <input type="hidden" name="action" value="delete_student">
                                             <input type="hidden" name="student_id" value="<?= htmlspecialchars($student['student_id']) ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger text-white" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" title="Delete Student">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Student"><i class="fas fa-trash me-1"></i>Delete</button>
                                         </form>
                                     </div>
                                 </td>
@@ -257,13 +395,12 @@ $students = $stmt->fetchAll();
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4">No students found matching your criteria.</td>
+                            <td colspan="9" class="text-center py-5 text-muted">No students found matching your filters.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
-        
     </div>
 </div>
 
@@ -273,9 +410,9 @@ $students = $stmt->fetchAll();
         <div class="modal-content">
             <form method="POST" action="">
                 <input type="hidden" name="action" value="add_student">
-                <div class="modal-header bg-dark text-white">
+                <div class="modal-header">
                     <h5 class="modal-title" id="newStudentModalLabel"><i class="fas fa-user-plus"></i> Add New Student</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info py-2">

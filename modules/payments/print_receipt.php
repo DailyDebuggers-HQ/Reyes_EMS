@@ -54,7 +54,7 @@ if(!$payment) die("Payment record not found.");
 
     <div class="receipt-container">
         <div class="school-header">
-            <h2>UA ACADEMY</h2>
+            <h2>K. Reyes Institute of Technology (KRIT)</h2>
             <p class="mb-0 text-muted" style="font-size: 14px;">Cashier's Office</p>
         </div>
 

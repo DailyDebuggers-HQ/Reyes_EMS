@@ -106,49 +106,95 @@ if ($success && $enrollment_id) {
 }
 ?>
 
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center bg-light p-3 border rounded">
-            <span class="badge bg-secondary fs-6"><i class="fas fa-check"></i> 1. Term & Subjects</span>
-            <i class="fas fa-arrow-right text-muted"></i>
-            <span class="badge bg-secondary fs-6"><i class="fas fa-check"></i> 2. Assessment Check</span>
-            <i class="fas fa-arrow-right text-muted"></i>
-            <span class="badge bg-success fs-6"><i class="fas fa-flag-checkered"></i> 3. Confirmed</span>
-        </div>
-    </div>
-</div>
+<style>
+    .enroll-step3 .flow-track {
+        border: 1px solid #dbe6f7;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #ffffff, #f8fbff);
+        padding: 0.9rem 1rem;
+    }
 
-<div class="row justify-content-center">
-    <div class="col-md-8 text-center mt-5">
-        <?php if(isset($success) && $success): ?>
-            <div class="card shadow-sm border-success">
-                <div class="card-body py-5">
-                    <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
-                    <h2 class="text-success">Enrollment Successful!</h2>
-                    <p class="lead">Student <strong><?= htmlspecialchars($student_id) ?></strong> has been officially enrolled for <strong><?= htmlspecialchars($acad_year) ?> - <?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?></strong>.</p>
-                    
-                    <div class="mt-5">
-                        <a href="print_cor.php?id=<?= $enrollment_id ?>" class="btn btn-warning btn-lg me-2" target="_blank">
-                            <i class="fas fa-print"></i> Print COR
+    .enroll-step3 .flow-pill {
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 0.86rem;
+        padding: 0.34rem 0.84rem;
+        background: #6f7c8c;
+        color: #fff;
+    }
+
+    .enroll-step3 .flow-pill.active {
+        background: linear-gradient(145deg, #198754, #2da96d);
+    }
+
+    .enroll-step3 .result-card {
+        border-radius: 22px;
+        border: 1px solid #cfe7dc;
+        background: linear-gradient(145deg, #ffffff, #f8fefb);
+        box-shadow: 0 26px 46px -36px rgba(18, 92, 54, 0.62);
+    }
+
+    .enroll-step3 .result-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        margin: 0 auto;
+        font-size: 2rem;
+        color: #fff;
+        background: linear-gradient(145deg, #198754, #2cac6e);
+    }
+
+    .enroll-step3 .fail-card {
+        border-radius: 18px;
+        border: 1px solid #f4c7ce;
+        background: linear-gradient(145deg, #fff7f8, #fff2f4);
+    }
+</style>
+
+<div class="enroll-step3">
+    <div class="flow-track d-flex justify-content-between align-items-center gap-2 mb-4">
+        <span class="flow-pill"><i class="fas fa-check me-1"></i>1. Term & Subjects</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="flow-pill"><i class="fas fa-check me-1"></i>2. Assessment Check</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="flow-pill active"><i class="fas fa-flag-checkered me-1"></i>3. Confirmed</span>
+    </div>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <?php if (isset($success) && $success): ?>
+                <div class="result-card text-center p-4 p-md-5">
+                    <div class="result-icon mb-3"><i class="fas fa-check"></i></div>
+                    <h2 class="text-success mb-2">Enrollment Successful</h2>
+                    <p class="lead mb-0">
+                        Student <strong><?= htmlspecialchars($student_id) ?></strong> is now enrolled for
+                        <strong><?= htmlspecialchars($acad_year) ?> - <?= $semester_id == 3 ? 'Summer' : htmlspecialchars($semester_id) . ' Semester' ?></strong>.
+                    </p>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+                        <a href="print_cor.php?id=<?= $enrollment_id ?>" class="btn btn-warning" target="_blank">
+                            <i class="fas fa-print me-1"></i>Print COR
                         </a>
-                        <a href="<?= BASE_PATH ?>modules/payments/pay.php?enrollment_id=<?= urlencode($enrollment_id) ?>" class="btn btn-primary btn-lg">
-                            <i class="fas fa-money-bill-wave"></i> Proceed to Payment
+                        <a href="<?= BASE_PATH ?>modules/payments/pay.php?enrollment_id=<?= urlencode($enrollment_id) ?>" class="btn btn-primary">
+                            <i class="fas fa-money-bill-wave me-1"></i>Proceed to Payment
                         </a>
                     </div>
+
                     <div class="mt-3">
                         <a href="<?= BASE_PATH ?>dashboard.php" class="text-muted">Return to Dashboard</a>
                     </div>
                 </div>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-danger shadow">
-                <h4><i class="fas fa-times-circle"></i> Enrollment Failed</h4>
-                <p>An error occurred while saving the enrollment data. No changes were made.</p>
-                <small><?= htmlspecialchars($error_message) ?></small>
-                <br><br>
-                <a href="step1.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-danger">Start Over</a>
-            </div>
-        <?php endif; ?>
+            <?php else: ?>
+                <div class="fail-card p-4">
+                    <h4 class="text-danger mb-2"><i class="fas fa-circle-xmark me-2"></i>Enrollment Failed</h4>
+                    <p class="mb-2">An error occurred while saving the enrollment data. No changes were committed.</p>
+                    <div class="small text-danger-emphasis mb-3"><?= htmlspecialchars($error_message) ?></div>
+                    <a href="step1.php?student_id=<?= urlencode($student_id) ?>" class="btn btn-danger btn-sm">Start Over</a>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 

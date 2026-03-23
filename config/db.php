@@ -20,7 +20,7 @@ if (!defined('BASE_PATH')) {
 }
 
 $host = '127.0.0.1';
-$db   = 'ems_db25';
+$db   = 'reyes26';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';

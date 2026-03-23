@@ -57,7 +57,7 @@ $schedules = $schedStmt->fetchAll();
 
     <div class="cor-container">
         <div class="school-header">
-            <h2>UA ACADEMY</h2>
+            <h2>K. Reyes Institute of Technology (KRIT)</h2>
             <p class="mb-0">Office of the University Registrar</p>
             <h4 class="mt-2 text-uppercase">Certificate of Registration</h4>
         </div>

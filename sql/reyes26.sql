@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 23, 2026 at 03:53 PM
+-- Generation Time: Mar 23, 2026 at 09:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -17,10 +17,12 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+CREATE DATABASE IF NOT EXISTS `reyes26` CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `reyes26`;
+
 --
 -- Database: `ems_db25`
-CREATE DATABASE IF NOT EXISTS `ems_db25`;
-USE `ems_db25`;
+--
 
 -- --------------------------------------------------------
 
@@ -53,22 +55,22 @@ INSERT INTO `courses` (`course_id`, `course_code`, `course_name`, `units_lec`, `
 (8, 'NSTP1', 'National Service Training Program 1', 3.00, 0.00, NULL),
 (9, 'NSTP2', 'National Service Training Program 2', 3.00, 0.00, NULL),
 (10, 'RIZAL', 'Life and Works of Rizal', 3.00, 0.00, NULL),
-(11, 'IT101', 'Introduction to Computing', 2.00, 1.00, NULL),
-(12, 'IT102', 'Computer Programming 1', 2.00, 1.00, NULL),
-(13, 'IT103', 'Computer Programming 2', 2.00, 1.00, NULL),
-(14, 'IT201', 'Data Structures and Algorithms', 2.00, 1.00, NULL),
-(15, 'IT202', 'Object-Oriented Programming', 2.00, 1.00, NULL),
-(16, 'IT301', 'Database Management Systems 1', 2.00, 1.00, NULL),
-(17, 'IT302', 'Database Management Systems 2', 2.00, 1.00, NULL),
-(18, 'IT303', 'Systems Integration and Architecture 1', 2.00, 1.00, NULL),
-(19, 'IT401', 'Capstone Project and Research 1', 3.00, 0.00, NULL),
-(20, 'IT402', 'Capstone Project and Research 2', 3.00, 0.00, NULL),
-(21, 'CS101', 'Computer Science Fundamentals', 3.00, 0.00, NULL),
-(22, 'CS201', 'Discrete Structures 1', 3.00, 0.00, NULL),
-(23, 'CS202', 'Discrete Structures 2', 3.00, 0.00, NULL),
-(24, 'CS301', 'Web Systems and Technologies', 2.00, 1.00, NULL),
-(25, 'CS302', 'Software Engineering 1', 2.00, 1.00, NULL),
-(26, 'CS401', 'CS Thesis Writing 1', 3.00, 0.00, NULL),
+(11, 'IT101', 'Introduction to IT', 3.00, 0.00, NULL),
+(12, 'IT102', 'Programming Basics', 3.00, 0.00, NULL),
+(13, 'IT103', 'Web Development Basics', 3.00, 0.00, NULL),
+(14, 'IT201', 'Web Dev 1', 3.00, 0.00, NULL),
+(15, 'IT202', 'Database Management', 3.00, 0.00, NULL),
+(16, 'IT301', 'Network Security', 3.00, 0.00, NULL),
+(17, 'IT302', 'Cloud Computing', 3.00, 0.00, NULL),
+(18, 'IT303', 'Web Dev 2', 3.00, 0.00, NULL),
+(19, 'IT401', 'Enterprise Solutions', 3.00, 0.00, NULL),
+(20, 'IT402', 'IT Project Management', 3.00, 0.00, NULL),
+(21, 'CS101', 'Fundamentals', 3.00, 0.00, NULL),
+(22, 'CS201', 'Advanced Algorithms', 3.00, 0.00, NULL),
+(23, 'CS202', 'Database Systems', 3.00, 0.00, NULL),
+(24, 'CS301', 'Software Engineering', 3.00, 0.00, NULL),
+(25, 'CS302', 'Systems Design', 3.00, 0.00, NULL),
+(26, 'CS401', 'Machine Learning', 3.00, 0.00, NULL),
 (31, 'ACC101', 'Financial Accounting & Reporting', 3.00, 0.00, NULL),
 (32, 'ACC102', 'Conceptual Framework and Accounting Standards', 3.00, 0.00, NULL),
 (33, 'ACC201', 'Intermediate Accounting 1', 3.00, 0.00, NULL),
@@ -99,7 +101,103 @@ INSERT INTO `courses` (`course_id`, `course_code`, `course_name`, `units_lec`, `
 (68, 'CE303', 'Surveying', 3.00, 1.00, NULL),
 (69, 'CE401', 'Structural Theory 1', 3.00, 1.00, NULL),
 (70, 'CE402', 'Geotechnical Engineering 1', 3.00, 1.00, NULL),
-(71, 'CE403', 'CE Project 1', 2.00, 0.00, NULL);
+(71, 'CE403', 'CE Project 1', 2.00, 0.00, NULL),
+(72, 'BA101', 'Introduction to Business', 3.00, 0.00, NULL),
+(73, 'BA102', 'Principles of Management', 3.00, 0.00, NULL),
+(74, 'BA103', 'Human Resource Management', 3.00, 0.00, NULL),
+(75, 'BA104', 'Marketing Management', 3.00, 0.00, NULL),
+(76, 'BA201', 'Financial Accounting', 3.00, 0.00, NULL),
+(77, 'BA202', 'Business Law', 3.00, 0.00, NULL),
+(78, 'BA203', 'Managerial Accounting', 3.00, 0.00, NULL),
+(79, 'BA204', 'Operations Management', 3.00, 0.00, NULL),
+(80, 'BA301', 'Financial Management', 3.00, 0.00, NULL),
+(81, 'BA302', 'Business Research', 3.00, 0.00, NULL),
+(82, 'BA303', 'International Business', 3.00, 0.00, NULL),
+(83, 'BA304', 'HR Management 2', 3.00, 0.00, NULL),
+(84, 'BA401', 'Strategic Management', 3.00, 0.00, NULL),
+(85, 'BA402', 'Practicum', 3.00, 0.00, NULL),
+(86, 'BA403', 'Corporate Governance', 3.00, 0.00, NULL),
+(87, 'BA404', 'Business Ethics', 3.00, 0.00, NULL),
+(88, 'TRM101', 'Intro to Tourism', 3.00, 0.00, NULL),
+(89, 'TRM102', 'Geography of Tourism', 3.00, 0.00, NULL),
+(90, 'TRM103', 'Tourist Attractions Management', 3.00, 0.00, NULL),
+(91, 'TRM104', 'Tourism Communications', 3.00, 0.00, NULL),
+(92, 'TRM201', 'Travel Agency Ops', 3.00, 0.00, NULL),
+(93, 'TRM202', 'Tourism Marketing', 3.00, 0.00, NULL),
+(94, 'TRM203', 'Hotel Operations', 3.00, 0.00, NULL),
+(95, 'TRM204', 'Tour Guiding', 3.00, 0.00, NULL),
+(96, 'TRM205', 'Event Tourism', 3.00, 0.00, NULL),
+(97, 'TRM206', 'Tourism Economics', 3.00, 0.00, NULL),
+(98, 'TRM301', 'Sustainable Tourism', 3.00, 0.00, NULL),
+(99, 'TRM302', 'Ecotourism', 3.00, 0.00, NULL),
+(100, 'TRM303', 'Cultural Tourism', 3.00, 0.00, NULL),
+(101, 'TRM304', 'Adventure Tourism', 3.00, 0.00, NULL),
+(102, 'TRM305', 'Tourism Planning', 3.00, 0.00, NULL),
+(103, 'TRM306', 'Tourism Finance', 3.00, 0.00, NULL),
+(104, 'TRM401', 'Internship 1', 3.00, 0.00, NULL),
+(105, 'TRM402', 'Strategy', 3.00, 0.00, NULL),
+(106, 'TRM403', 'Internship 2', 3.00, 0.00, NULL),
+(107, 'TRM404', 'Research', 3.00, 0.00, NULL),
+(108, 'CUL101', 'Kitchen Essentials', 3.00, 0.00, NULL),
+(109, 'CUL102', 'Food Safety', 3.00, 0.00, NULL),
+(110, 'CUL103', 'Knife Skills', 3.00, 0.00, NULL),
+(111, 'CUL104', 'Cooking Techniques', 3.00, 0.00, NULL),
+(112, 'CUL201', 'Garde Manger', 3.00, 0.00, NULL),
+(113, 'CUL202', 'Baking', 3.00, 0.00, NULL),
+(114, 'CUL203', 'Soups & Sauces', 3.00, 0.00, NULL),
+(115, 'CUL204', 'Meat Cooking', 3.00, 0.00, NULL),
+(116, 'CUL205', 'Seafood', 3.00, 0.00, NULL),
+(117, 'CUL206', 'Pastry', 3.00, 0.00, NULL),
+(118, 'CUL301', 'International Cuisine', 3.00, 0.00, NULL),
+(119, 'CUL302', 'Food Production', 3.00, 0.00, NULL),
+(120, 'CUL303', 'Advanced Baking', 3.00, 0.00, NULL),
+(121, 'CUL304', 'Molecular Gastronomy', 3.00, 0.00, NULL),
+(122, 'CUL305', 'Menu Planning', 3.00, 0.00, NULL),
+(123, 'CUL306', 'Culinary Management', 3.00, 0.00, NULL),
+(124, 'CUL401', 'Internship 1', 3.00, 0.00, NULL),
+(125, 'CUL402', 'Advanced Cooking', 3.00, 0.00, NULL),
+(126, 'CUL403', 'Internship 2', 3.00, 0.00, NULL),
+(127, 'CUL404', 'Food Innovation', 3.00, 0.00, NULL),
+(128, 'HM101', 'Front Office', 3.00, 0.00, NULL),
+(129, 'HM102', 'Housekeeping', 3.00, 0.00, NULL),
+(130, 'HM103', 'Guest Services', 3.00, 0.00, NULL),
+(131, 'HM104', 'Communication', 3.00, 0.00, NULL),
+(132, 'HM201', 'Food & Beverage', 3.00, 0.00, NULL),
+(133, 'HM202', 'Bar Management', 3.00, 0.00, NULL),
+(134, 'HM203', 'Kitchen Ops', 3.00, 0.00, NULL),
+(135, 'HM204', 'Revenue Management', 3.00, 0.00, NULL),
+(136, 'HM205', 'Reservation Systems', 3.00, 0.00, NULL),
+(137, 'HM206', 'Guest Relations', 3.00, 0.00, NULL),
+(138, 'HM301', 'Event Management', 3.00, 0.00, NULL),
+(139, 'HM302', 'Hospitality Law', 3.00, 0.00, NULL),
+(140, 'HM303', 'F&B Management', 3.00, 0.00, NULL),
+(141, 'HM304', 'Rooms Division', 3.00, 0.00, NULL),
+(142, 'HM305', 'Marketing', 3.00, 0.00, NULL),
+(143, 'HM306', 'Quality Assurance', 3.00, 0.00, NULL),
+(144, 'HM401', 'Internship 1', 3.00, 0.00, NULL),
+(145, 'HM402', 'Strategy', 3.00, 0.00, NULL),
+(146, 'HM403', 'Internship 2', 3.00, 0.00, NULL),
+(147, 'HM404', 'Leadership', 3.00, 0.00, NULL),
+(148, 'IT104', 'Database Fundamentals', 3.00, 0.00, NULL),
+(149, 'IT203', 'Network Admin', 3.00, 0.00, NULL),
+(150, 'IT204', 'Systems Admin', 3.00, 0.00, NULL),
+(151, 'IT304', 'Advanced Database', 3.00, 0.00, NULL),
+(152, 'IT403', 'Internship 1', 3.00, 0.00, NULL),
+(153, 'IT404', 'Internship 2', 3.00, 0.00, NULL),
+(154, 'CS102', 'Data Structures', 3.00, 0.00, NULL),
+(155, 'CS103', 'OOP', 3.00, 0.00, NULL),
+(156, 'CS104', 'Algorithms', 3.00, 0.00, NULL),
+(157, 'CS203', 'Operating Systems', 3.00, 0.00, NULL),
+(158, 'CS204', 'Networks', 3.00, 0.00, NULL),
+(159, 'CS303', 'Compiler Design', 3.00, 0.00, NULL),
+(160, 'CS304', 'AI', 3.00, 0.00, NULL),
+(161, 'CS402', 'Data Science', 3.00, 0.00, NULL),
+(162, 'CS403', 'Capstone', 3.00, 0.00, NULL),
+(163, 'CS404', 'Internship', 3.00, 0.00, NULL),
+(164, 'GEC101', 'Understanding the Self', 3.00, 0.00, NULL),
+(165, 'GEC102', 'History / Math / Culture (depends on program)', 3.00, 0.00, NULL),
+(166, 'GEC103', 'Contemporary World', 3.00, 0.00, NULL),
+(167, 'GEC104', 'Mathematics', 3.00, 0.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -273,7 +371,7 @@ CREATE TABLE `enrollments` (
 INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `academic_year`, `semester_id`, `enrollment_date`, `status`, `total_units`, `assessed_amount`, `section`, `program_id`) VALUES
 (52, 'UAA-2022-0001', '2023-2024', 1, '2023-08-01 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
 (53, 'UAA-2022-0001', '2024-2025', 1, '2024-08-01 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
-(54, 'UAA-2022-0001', '2025-2026', 1, '2025-08-01 10:00:00', 'Enrolled', 6.00, 7500.00, 'X', NULL),
+(54, 'UAA-2022-0001', '2025-2026', 1, '2025-08-01 10:00:00', 'Enrolled', 6.00, 4500.00, 'X', 1),
 (56, 'UAA-2022-0002', '2023-2024', 1, '2023-08-01 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
 (57, 'UAA-2022-0002', '2024-2025', 1, '2024-08-01 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
 (58, 'UAA-2022-0002', '2025-2026', 1, '2025-08-01 10:00:00', 'Enrolled', 6.00, 7500.00, 'X', NULL),
@@ -320,7 +418,7 @@ INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `academic_year`, `seme
 (102, 'UAA-2022-0001', '2022-2023', 2, '2023-01-15 10:00:00', 'Enrolled', 11.00, 11250.00, 'X', NULL),
 (103, 'UAA-2022-0001', '2023-2024', 2, '2024-01-15 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
 (104, 'UAA-2022-0001', '2024-2025', 2, '2025-01-15 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
-(105, 'UAA-2022-0001', '2025-2026', 2, '2026-01-15 10:00:00', 'Enrolled', 6.00, 7500.00, 'X', NULL),
+(105, 'UAA-2022-0001', '2025-2026', 2, '2026-01-15 10:00:00', 'Enrolled', 6.00, 4500.00, 'X', 1),
 (106, 'UAA-2022-0002', '2022-2023', 1, '2022-08-15 10:00:00', 'Enrolled', 11.00, 11250.00, 'X', NULL),
 (107, 'UAA-2022-0002', '2022-2023', 2, '2023-01-15 10:00:00', 'Enrolled', 11.00, 11250.00, 'X', NULL),
 (108, 'UAA-2022-0002', '2023-2024', 2, '2024-01-15 10:00:00', 'Enrolled', 9.00, 9750.00, 'X', NULL),
@@ -371,7 +469,7 @@ INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `academic_year`, `seme
 (153, 'UAA-2025-0003', '2025-2026', 2, '2026-01-15 10:00:00', 'Enrolled', 11.00, 11250.00, 'X', NULL),
 (154, 'UAA-2025-0004', '2025-2026', 2, '2026-01-15 10:00:00', 'Enrolled', 16.00, 15000.00, 'X', NULL),
 (155, 'UAA-2025-0005', '2025-2026', 2, '2026-01-15 10:00:00', 'Enrolled', 14.00, 13500.00, 'X', NULL),
-(170, 'UAA-2022-0001', '2025-2026', 3, '2026-03-23 22:06:01', 'Enrolled', 35.00, 23000.00, 'X', 1);
+(170, 'UAA-2022-0001', '2025-2026', 3, '2026-03-23 22:06:01', 'Enrolled', 38.00, 20500.00, 'X', 3);
 
 -- --------------------------------------------------------
 
@@ -396,8 +494,6 @@ INSERT INTO `enrollment_schedules` (`id`, `enrollment_id`, `schedule_id`) VALUES
 (4, 53, 168),
 (5, 53, 176),
 (6, 53, 56),
-(7, 54, 186),
-(8, 54, 74),
 (9, 56, 214),
 (10, 56, 142),
 (11, 56, 46),
@@ -551,8 +647,6 @@ INSERT INTO `enrollment_schedules` (`id`, `enrollment_id`, `schedule_id`) VALUES
 (159, 104, 166),
 (160, 104, 174),
 (161, 104, 54),
-(162, 105, 182),
-(163, 105, 70),
 (164, 106, 38),
 (165, 106, 198),
 (166, 106, 78),
@@ -728,18 +822,23 @@ INSERT INTO `enrollment_schedules` (`id`, `enrollment_id`, `schedule_id`) VALUES
 (336, 155, 422),
 (337, 155, 78),
 (338, 155, 94),
-(387, 170, 950),
-(388, 170, 951),
-(389, 170, 952),
-(390, 170, 953),
-(391, 170, 954),
-(392, 170, 955),
-(393, 170, 963),
-(394, 170, 964),
-(395, 170, 965),
-(396, 170, 966),
-(397, 170, 967),
-(398, 170, 968);
+(431, 54, 186),
+(432, 54, 74),
+(433, 105, 187),
+(434, 105, 75),
+(435, 170, 950),
+(436, 170, 951),
+(437, 170, 952),
+(438, 170, 953),
+(439, 170, 954),
+(440, 170, 955),
+(441, 170, 956),
+(442, 170, 957),
+(443, 170, 958),
+(444, 170, 959),
+(445, 170, 960),
+(446, 170, 961),
+(447, 170, 962);
 
 -- --------------------------------------------------------
 
@@ -884,11 +983,14 @@ CREATE TABLE `programs` (
 --
 
 INSERT INTO `programs` (`program_id`, `program_code`, `program_name`, `department`) VALUES
-(1, 'BSIT', 'Bachelor of Science in Information Technology', 'College of Computer Studies'),
-(2, 'BSCS', 'Bachelor of Science in Computer Science', 'College of Computer Studies'),
-(3, 'BSA', 'Bachelor of Science in Accountancy', 'College of Business'),
+(1, 'BSIT', 'Information Technology', 'College of Computer Studies'),
+(2, 'BSCS', 'Computer Science', 'College of Computer Studies'),
+(3, 'BSA', 'Business Administration', 'College of Business'),
 (4, 'BSN', 'Bachelor of Science in Nursing', 'College of Nursing'),
-(5, 'BSCE', 'Bachelor of Science in Civil Engineering', 'College of Engineering');
+(5, 'BSCE', 'Bachelor of Science in Civil Engineering', 'College of Engineering'),
+(6, 'BSTM', 'Tourism', 'College of Business'),
+(7, 'BSCA', 'Culinary Arts', 'College of Business'),
+(8, 'BSHM', 'Hospitality Management', 'College of Business');
 
 -- --------------------------------------------------------
 
@@ -952,8 +1054,8 @@ INSERT INTO `schedules` (`schedule_id`, `course_id`, `academic_year`, `semester_
 (71, 5, '2023-2024', 2, 2, 'Wed', '11:00:00', '17:00:00', 'RM-311', 40, 0, 'X'),
 (72, 5, '2024-2025', 1, 1, 'Mon', '12:00:00', '16:00:00', 'RM-209', 40, 0, 'X'),
 (73, 5, '2024-2025', 2, 7, 'Thu', '12:00:00', '17:00:00', 'RM-400', 40, 0, 'X'),
-(74, 5, '2025-2026', 1, 2, 'Mon', '14:00:00', '15:00:00', 'RM-371', 40, 0, 'X'),
-(75, 5, '2025-2026', 2, 1, 'Thu', '12:00:00', '15:00:00', 'RM-227', 40, 0, 'X'),
+(74, 5, '2025-2026', 1, 2, 'Mon', '14:00:00', '15:00:00', 'RM-371', 40, 1, 'X'),
+(75, 5, '2025-2026', 2, 1, 'Thu', '12:00:00', '15:00:00', 'RM-227', 40, 1, 'X'),
 (76, 5, '2026-2027', 1, 1, 'Mon', '14:00:00', '15:00:00', 'RM-151', 40, 0, 'X'),
 (77, 5, '2026-2027', 2, 2, 'Fri', '10:00:00', '15:00:00', 'RM-149', 40, 0, 'X'),
 (78, 6, '2023-2024', 1, 7, 'Mon', '08:00:00', '15:00:00', 'RM-410', 40, 0, 'X'),
@@ -1064,8 +1166,8 @@ INSERT INTO `schedules` (`schedule_id`, `course_id`, `academic_year`, `semester_
 (183, 19, '2023-2024', 2, 1, 'Wed', '09:00:00', '17:00:00', 'RM-430', 40, 0, 'X'),
 (184, 19, '2024-2025', 1, 3, 'Fri', '12:00:00', '15:00:00', 'RM-309', 40, 0, 'X'),
 (185, 19, '2024-2025', 2, 4, 'Thu', '14:00:00', '15:00:00', 'RM-137', 40, 0, 'X'),
-(186, 19, '2025-2026', 1, 3, 'Mon', '12:00:00', '17:00:00', 'RM-347', 40, 0, 'X'),
-(187, 19, '2025-2026', 2, 5, 'Mon', '09:00:00', '16:00:00', 'RM-194', 40, 0, 'X'),
+(186, 19, '2025-2026', 1, 3, 'Mon', '12:00:00', '17:00:00', 'RM-347', 40, 1, 'X'),
+(187, 19, '2025-2026', 2, 5, 'Mon', '09:00:00', '16:00:00', 'RM-194', 40, 1, 'X'),
 (188, 19, '2026-2027', 1, 2, 'Mon', '13:00:00', '15:00:00', 'RM-141', 40, 0, 'X'),
 (189, 19, '2026-2027', 2, 7, 'Mon', '09:00:00', '17:00:00', 'RM-132', 40, 0, 'X'),
 (190, 20, '2023-2024', 1, 7, 'Wed', '08:00:00', '17:00:00', 'RM-338', 40, 0, 'X'),
@@ -1835,19 +1937,19 @@ INSERT INTO `schedules` (`schedule_id`, `course_id`, `academic_year`, `semester_
 (953, 5, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 4, 'X'),
 (954, 6, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
 (955, 8, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
-(956, 31, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(957, 33, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 3, 'X'),
-(958, 35, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(959, 36, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(960, 38, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(961, 39, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(962, 40, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(963, 11, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(964, 14, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(965, 15, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(966, 17, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(967, 18, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
-(968, 19, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 1, 'X'),
+(956, 31, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(957, 33, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 4, 'X'),
+(958, 35, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(959, 36, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(960, 38, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(961, 39, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(962, 40, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 2, 'X'),
+(963, 11, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
+(964, 14, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
+(965, 15, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
+(966, 17, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
+(967, 18, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
+(968, 19, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
 (969, 16, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
 (970, 21, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
 (971, 22, '2025-2026', 3, NULL, 'TBA', '08:00:00', '11:00:00', 'TBA', 40, 0, 'X'),
@@ -1900,26 +2002,26 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `first_name`, `last_name`, `gender`, `birthdate`, `contact_number`, `email`, `program_id`, `year_level_id`, `status`, `section`) VALUES
-('UAA-2022-0001', 'Naruto', 'Uzumaki_25', 'Female', NULL, NULL, NULL, 1, 4, 'Regular', 'Y'),
-('UAA-2022-0002', 'Mikasa', 'Ackerman_25', 'Male', NULL, NULL, NULL, 2, 4, 'Regular', 'X'),
-('UAA-2022-0003', 'Eren', 'Yeager_25', 'Female', NULL, NULL, NULL, 3, 4, 'Regular', 'X'),
-('UAA-2022-0004', 'Luffy', 'Monkey D._25', 'Male', NULL, NULL, NULL, 4, 4, 'Regular', 'X'),
-('UAA-2022-0005', 'Satoru', 'Gojo_25', 'Female', NULL, NULL, NULL, 5, 4, 'Regular', 'X'),
-('UAA-2023-0001', 'Tanjiro', 'Kamado_25', 'Male', NULL, NULL, NULL, 1, 3, 'Regular', 'X'),
-('UAA-2023-0002', 'Ichigo', 'Kurosaki_25', 'Female', NULL, NULL, NULL, 2, 3, 'Regular', 'Y'),
-('UAA-2023-0003', 'Izuku', 'Midoriya_25', 'Male', NULL, NULL, NULL, 3, 3, 'Regular', 'X'),
-('UAA-2023-0004', 'Sakura', 'Haruno_25', 'Female', NULL, NULL, NULL, 4, 3, 'Regular', 'X'),
-('UAA-2023-0005', 'Lelouch', 'Lamperouge_25', 'Male', NULL, NULL, NULL, 5, 3, 'Regular', 'Y'),
-('UAA-2024-0001', 'Conan', 'Edogawa_25', 'Female', NULL, NULL, NULL, 1, 2, 'Regular', 'Y'),
-('UAA-2024-0002', 'Senku', 'Ishigami_25', 'Male', NULL, NULL, NULL, 2, 2, 'Regular', 'Y'),
-('UAA-2024-0003', 'Light', 'Yagami_25', 'Female', NULL, NULL, NULL, 3, 2, 'Regular', 'Y'),
-('UAA-2024-0004', 'Yusuke', 'Urameshi_25', 'Male', NULL, NULL, NULL, 4, 2, 'Regular', 'Y'),
-('UAA-2024-0005', 'Natsu', 'Dragneel_25', 'Female', NULL, NULL, NULL, 5, 2, 'Regular', 'X'),
-('UAA-2025-0001', 'Kyojuro', 'Rengoku_25', 'Male', NULL, NULL, NULL, 1, 1, 'Regular', 'X'),
-('UAA-2025-0002', 'Kusuo', 'Saiki_25', 'Female', NULL, NULL, NULL, 2, 1, 'Regular', 'Y'),
-('UAA-2025-0003', 'Gintoki', 'Sakata_25', 'Male', NULL, NULL, NULL, 3, 1, 'Regular', 'Y'),
-('UAA-2025-0004', 'Spike', 'Spiegel_25', 'Female', NULL, NULL, NULL, 4, 1, 'Regular', 'Y'),
-('UAA-2025-0005', 'Shoto', 'Todoroki_25', 'Male', NULL, NULL, NULL, 5, 1, 'Regular', 'X');
+('UAA-2022-0001', 'Vincent', 'Pascual_26', 'Female', NULL, NULL, NULL, 3, 4, 'Regular', 'Y'),
+('UAA-2022-0002', 'Camille', 'Fernandez_26', 'Male', NULL, NULL, NULL, 6, 4, 'Regular', 'X'),
+('UAA-2022-0003', 'Joshua', 'Navarro_26', 'Female', NULL, NULL, NULL, 7, 4, 'Regular', 'X'),
+('UAA-2022-0004', 'Andrea', 'Castillo_26', 'Male', NULL, NULL, NULL, 8, 4, 'Regular', 'X'),
+('UAA-2022-0005', 'Miguel', 'Soriano_26', 'Female', NULL, NULL, NULL, 3, 4, 'Regular', 'X'),
+('UAA-2023-0001', 'Patricia', 'Lagman_26', 'Male', NULL, NULL, NULL, 6, 3, 'Regular', 'X'),
+('UAA-2023-0002', 'Carlo', 'Dizon_26', 'Female', NULL, NULL, NULL, 7, 3, 'Regular', 'Y'),
+('UAA-2023-0003', 'Isabella', 'Kim_26', 'Male', NULL, NULL, NULL, 8, 3, 'Regular', 'X'),
+('UAA-2023-0004', 'Alexander', 'Park_26', 'Female', NULL, NULL, NULL, 3, 3, 'Regular', 'X'),
+('UAA-2023-0005', 'Mia', 'Choi_26', 'Male', NULL, NULL, NULL, 6, 3, 'Regular', 'Y'),
+('UAA-2024-0001', 'Anthony', 'Reyes_26', 'Female', NULL, NULL, NULL, 1, 2, 'Regular', 'Y'),
+('UAA-2024-0002', 'Bianca', 'Lopez_26', 'Male', NULL, NULL, NULL, 1, 2, 'Regular', 'Y'),
+('UAA-2024-0003', 'Carlo', 'Gonzalez_26', 'Female', NULL, NULL, NULL, 2, 2, 'Regular', 'Y'),
+('UAA-2024-0004', 'Diana', 'Martinez_26', 'Male', NULL, NULL, NULL, 2, 2, 'Regular', 'Y'),
+('UAA-2024-0005', 'Edward', 'Cruz_26', 'Female', NULL, NULL, NULL, 1, 2, 'Regular', 'X'),
+('UAA-2025-0001', 'Fiona', 'Santos_26', 'Male', NULL, NULL, NULL, 1, 1, 'Regular', 'X'),
+('UAA-2025-0002', 'Gabriel', 'Torres_26', 'Female', NULL, NULL, NULL, 2, 1, 'Regular', 'Y'),
+('UAA-2025-0003', 'Hannah', 'Valdez_26', 'Male', NULL, NULL, NULL, 2, 1, 'Regular', 'Y'),
+('UAA-2025-0004', 'Ian', 'Flores_26', 'Female', NULL, NULL, NULL, 1, 1, 'Regular', 'Y'),
+('UAA-2025-0005', 'Jasmine', 'Delacruz_26', 'Male', NULL, NULL, NULL, 2, 1, 'Regular', 'X');
 
 -- --------------------------------------------------------
 
@@ -2058,7 +2160,7 @@ ALTER TABLE `year_levels`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
+  MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
 
 --
 -- AUTO_INCREMENT for table `curriculum`
@@ -2076,7 +2178,7 @@ ALTER TABLE `enrollments`
 -- AUTO_INCREMENT for table `enrollment_schedules`
 --
 ALTER TABLE `enrollment_schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=431;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=448;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -2088,7 +2190,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `programs`
 --
 ALTER TABLE `programs`
-  MODIFY `program_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `program_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `schedules`
