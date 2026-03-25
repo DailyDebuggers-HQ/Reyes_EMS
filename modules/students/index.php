@@ -13,24 +13,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     try {
         $pdo->beginTransaction();
-        
-        // Auto-generate Student ID: UAA-YYYY-NNNN
+
+        // Auto-generate Student ID: STU-YYYY-NNNN
         $current_year = date('Y');
-        $prefix = "UAA-{$current_year}-";
-        
-        // Find the highest sequence number for the current year
-        $stmt_seq = $pdo->prepare("SELECT student_id FROM students WHERE student_id LIKE ? ORDER BY student_id DESC LIMIT 1");
+        $prefix = "STU-{$current_year}-";
+
+        // Lock matching rows to avoid duplicate ID generation during concurrent inserts.
+        $stmt_seq = $pdo->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(student_id, '-', -1) AS UNSIGNED)) FROM students WHERE student_id LIKE ? FOR UPDATE");
         $stmt_seq->execute([$prefix . '%']);
-        $last_id = $stmt_seq->fetchColumn();
-        
-        $seq = 1;
-        if ($last_id) {
-            $parts = explode('-', $last_id);
-            if (isset($parts[2])) {
-                $seq = (int)$parts[2] + 1;
-            }
-        }
-        
+        $max_seq = (int)$stmt_seq->fetchColumn();
+        $seq = max(1, $max_seq + 1);
+
         $student_id = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
 
         $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, gender, program_id, year_level_id, status) VALUES (?, ?, ?, ?, ?, ?, 'Regular')");
@@ -416,7 +409,7 @@ function formatSectionLabel(array $student): string {
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info py-2">
-                        <i class="fas fa-info-circle"></i> Student ID will be automatically generated as <strong>UAA-<?= date('Y') ?>-XXXX</strong>
+                        <i class="fas fa-info-circle"></i> Student ID will be automatically generated as <strong>STU-<?= date('Y') ?>-XXXX</strong>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
