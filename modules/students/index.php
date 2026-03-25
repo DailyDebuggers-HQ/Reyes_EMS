@@ -14,24 +14,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $pdo->beginTransaction();
 
-        // Auto-generate Student ID: STU-YYYY-NNNN
-        $current_year = date('Y');
-        $prefix = "STU-{$current_year}-";
+        // Auto-generate Student ID using a high-entropy format: SID-YYYYMMDD-XXXXXXXX
+        $attempts = 0;
+        do {
+            $attempts++;
+            $student_id = 'SID-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 
-        // Lock matching rows to avoid duplicate ID generation during concurrent inserts.
-        $stmt_seq = $pdo->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(student_id, '-', -1) AS UNSIGNED)) FROM students WHERE student_id LIKE ? FOR UPDATE");
-        $stmt_seq->execute([$prefix . '%']);
-        $max_seq = (int)$stmt_seq->fetchColumn();
-        $seq = max(1, $max_seq + 1);
+            $checkStmt = $pdo->prepare("SELECT 1 FROM students WHERE student_id = ? LIMIT 1");
+            $checkStmt->execute([$student_id]);
+            $exists = (bool)$checkStmt->fetchColumn();
+        } while ($exists && $attempts < 5);
 
-        $student_id = $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        if ($exists) {
+            throw new RuntimeException('Unable to generate a unique student ID. Please try again.');
+        }
 
         $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, gender, program_id, year_level_id, status) VALUES (?, ?, ?, ?, ?, ?, 'Regular')");
         $stmt->execute([$student_id, $first_name, $last_name, $gender, $program_id, $year_level_id]);
         
         $pdo->commit();
         echo "<div class='alert alert-success alert-dismissible fade show'><i class='fas fa-check-circle'></i> Student {$student_id} added successfully! <button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
-    } catch (PDOException $e) {
+    } catch (Throwable $e) {
         $pdo->rollBack();
         if ($e->getCode() == 23000) {
             echo "<div class='alert alert-danger alert-dismissible fade show'><i class='fas fa-exclamation-triangle'></i> Student ID already exists! <button type='button' class='btn-close' data-bs-dismiss='alert'></button></div>";
@@ -409,7 +412,7 @@ function formatSectionLabel(array $student): string {
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info py-2">
-                        <i class="fas fa-info-circle"></i> Student ID will be automatically generated as <strong>STU-<?= date('Y') ?>-XXXX</strong>
+                        <i class="fas fa-info-circle"></i> Student ID will be automatically generated as <strong>SID-<?= date('Ymd') ?>-XXXXXXXX</strong>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
